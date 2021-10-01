@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "juegauno-a9c94": {
+      "hosting": {
+        "juegauno": [
+          "juegauno-a9c94"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+<div class="container">
+  <div class="row">
+    <div class="col s12 deck">
+        <div class="card-container" *ngFor="let card of player.deck"
+        [style.width]="100 / player.deck.length + '%'">
+          <mat-card [style.backgroundColor]="card | cardColor"
+          class="card mat-elevation-z5"
+          >
+            <mat-card-content>
+              <div class="card-value" [innerHtml]="card | cardValue:'small'"></div>
+              <div class="big-value" >
+                <span class="front" [innerHtml]="card | cardValue:'big'"></span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+    </div>
+  </div>
+</div>
