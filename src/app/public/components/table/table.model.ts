@@ -4,14 +4,11 @@ import firebase from 'firebase/app'
 export class TableModel {
   public id: string;
   public deck: iCard[]
-  // public players: iPlayer[]
   public created: Date
   constructor(
-    player1?: iPlayer,
   ) {
     this.id = Math.random().toString( 36 ).substring( 6 )
     this.deck = Deck
-    // this.players = [player1]
     this.created = new Date()
   }
 }
@@ -23,9 +20,11 @@ export interface iTable {
   id: string
 }
 
+export type ColorType = 'red' | 'grn' | 'blu' | 'ylw' | 'blk'
+
 export interface iCard {
   id: string,
-  color: 'red' | 'grn' | 'blu' | 'ylw' | 'blk'
+  color: ColorType,
   value: CardValue
 }
 

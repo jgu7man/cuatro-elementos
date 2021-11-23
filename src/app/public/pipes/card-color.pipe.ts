@@ -1,23 +1,25 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { iCard } from '../components/table/table.model';
+import { ColorType, iCard } from '../components/table/table.model';
 
 @Pipe({
   name: 'cardColor'
 })
 export class CardColorPipe implements PipeTransform {
 
-  transform( card: iCard, ...args: unknown[] ): string {
+  transform( cardColor: ColorType, ...args: ('color' | 'name')[] ): string {
+    const tag = args[0]
     let color: string = ''
-    switch (card.color) {
-      case 'blk': color = '#202020'
+
+    switch (cardColor) {
+      case 'blk': color = tag == 'color' ? '#202020' : 'Negro'
         break;
-      case 'blu': color = '#0059b1'
+      case 'blu': color = tag == 'color' ? '#0059b1' : 'Agua'
         break;
-      case 'grn': color = '#347c2a'
+      case 'grn': color = tag == 'color' ? '#347c2a' : 'Tierra'
         break;
-      case 'red': color = '#d20019'
+      case 'red': color = tag == 'color' ? '#d20019' : 'Fuego'
         break;
-      case 'ylw': color = '#d8c100'
+      case 'ylw': color = tag == 'color' ? '#d8c100' : 'Aire'
     }
     return color
   }

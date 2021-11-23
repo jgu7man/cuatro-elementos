@@ -9,6 +9,9 @@ import { MaterialModule } from 'src/shared/material.module';
 import { CardColorPipe } from './pipes/card-color.pipe';
 import { CardValuePipe } from './pipes/card-value.pipe';
 import { CardBigValuePipe } from './pipes/card-big-value.pipe';
+import { AvalibleCardPipe } from './pipes/avalible-card.pipe';
+import { SelectColorDialog } from './components/select-color/select-color.dialog';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -18,12 +21,15 @@ import { CardBigValuePipe } from './pipes/card-big-value.pipe';
     TableComponent,
     CardColorPipe,
     CardValuePipe,
-    CardBigValuePipe
+    CardBigValuePipe,
+    AvalibleCardPipe,
+    SelectColorDialog
   ],
   imports: [
     CommonModule,
     PublicRoutingModule,
-    MaterialModule
+    MaterialModule,
+    ReactiveFormsModule
   ]
 })
 export class PublicModule { }
