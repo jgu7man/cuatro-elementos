@@ -12,6 +12,7 @@ import { CardBigValuePipe } from './pipes/card-big-value.pipe';
 import { AvalibleCardPipe } from './pipes/avalible-card.pipe';
 import { SelectColorDialog } from './components/select-color/select-color.dialog';
 import { ReactiveFormsModule } from '@angular/forms';
+import { WinnerDialog } from './components/winner/winner.dialog';
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import { ReactiveFormsModule } from '@angular/forms';
     CardValuePipe,
     CardBigValuePipe,
     AvalibleCardPipe,
-    SelectColorDialog
+    SelectColorDialog,
+    WinnerDialog
   ],
   imports: [
     CommonModule,

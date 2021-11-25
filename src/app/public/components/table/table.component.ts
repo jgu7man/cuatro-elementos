@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { iPlayer, PlayerModel } from '../lobby/player.model';
 import { SelectColorDialog } from '../select-color/select-color.dialog';
+import { WinnerDialog } from '../winner/winner.dialog';
 import { ColorType, iCard, TableModel } from './table.model';
+import { first } from 'rxjs/operators'
 
 @Component({
   templateUrl: './table.component.html',
@@ -10,55 +12,120 @@ import { ColorType, iCard, TableModel } from './table.model';
 })
 export class TableComponent implements OnInit {
 
-  idTable: string
-  newTable: TableModel
-  player: PlayerModel
+  // idTable: string
+  table!: TableModel
+  // player: PlayerModel
   droppedDeck: iCard[] = []
   colorSelected?: ColorType
+  players: PlayerModel[] = []
+  clockDirection: boolean = true
 
   constructor (
     private _dialog: MatDialog
-  ) {
-    this.newTable = new TableModel();
-    this.idTable = this.newTable.id
-    this.player = new PlayerModel('jorge')
+  ) {}
+
+  getStarted() {
+    this.droppedDeck = []
+    this.table = new TableModel();
+    // this.idTable = this.newTable.id
+    this.players = [
+      new PlayerModel( 'jorge' ),
+      new PlayerModel( 'meche' ),
+      new PlayerModel( 'julio' ),
+      new PlayerModel( 'ary' ),
+    ]
+
+    this.players[ Math.floor( Math.random() * this.players.length ) ].current = true
+    this.players.forEach( ( player, index ) => this.getFirstCards( index ) )
+
+    let startCard = this.table.deck[ Math.floor( Math.random() * this.table.deck.length ) ]
+    this.droppedDeck.push( startCard )
+    this.table.deck.splice( this.table.deck.indexOf(startCard), 1 )
   }
 
   ngOnInit(): void {
-    this.getFirstCards()
+    this.getStarted()
   }
 
-  getFirstCards() {
+  getFirstCards(player: number): void {
     for ( var i = 0; i < 7; i++ ){
-      this.getCard()
+      this.getCard(player)
     }
   }
 
-  getCard() {
-    if ( this.newTable.deck.length > 0 ) {
-      let card = this.newTable.deck[ Math.floor( Math.random() * this.newTable.deck.length ) ]
-      this.player.deck.push( card )
-      this.newTable.deck.splice(
-        this.newTable.deck.indexOf(card), 1
+  getCard(player: number) {
+    if ( this.table.deck.length > 0 ) {
+      const card = this.table.deck[ Math.floor( Math.random() * this.table.deck.length ) ]
+
+      this.players[ player ].deck.push( card )
+      this.table.deck.splice(
+        this.table.deck.indexOf(card), 1
       )
     }
   }
 
+  get current() {
+    return this.players.findIndex( p => p.current === true)
+  }
+
+  get next() {
+    const next = this.clockDirection
+      ? this.current + 1 === this.players.length ? 0 : this.current + 1
+      : this.current - 1 === -1 ? this.players.length - 1 : this.current - 1
+    return next
+  }
+
   dropCard( card: iCard ) {
     if ( this.avalibleCard( card ) ) {
-      const index = this.player.deck.indexOf( card )
-      this.player.deck.splice( index, 1 )
+      const indexCard = this.players[this.current].deck.indexOf( card )
+      this.players[this.current].deck.splice( indexCard, 1 )
       this.droppedDeck.push( card )
 
-      if ( card.color === 'blk' ) {
-        this.openColorSelecter()
-      }
+      const deckLength = this.players[ this.current ].deck.length
+      if ( deckLength === 0 ) {
+        this._dialog.open( WinnerDialog, {
+          disableClose: true,
+          data: this.players[ this.current ]
+        } ).afterClosed().pipe( first() ).subscribe( restart => {
+          if(restart) this.getStarted()
+        })
+      } else if ( deckLength === 1 ) {
+        this.setCardValue(card)
+      } else this.setCardValue(card)
 
-      if ( this.colorSelected ) {
-        delete this.colorSelected
-      }
+
+      this.changeTurn()
 
     }
+  }
+
+  setCardValue(card: iCard) {
+    if ( card.value == 'tu' ) {
+      this.clockDirection = !this.clockDirection
+    } else if ( card.value == 'bl' ) {
+      this.changeTurn()
+    } else if ( card.value == '+2' ) {
+      this.getCard(this.next)
+      this.getCard(this.next)
+    } else if ( card.value == '+4' ) {
+      [ 1, 2, 3, 4 ].forEach( card => {
+        this.getCard(this.next)
+      })
+    }
+    if ( card.color === 'blk' ) {
+      this.openColorSelecter()
+    }
+    if ( this.colorSelected ) {
+      delete this.colorSelected
+    }
+  }
+
+  changeTurn() {
+    this.players = this.players.map( ( player, index ) => {
+      return index === this.next
+      ? { ...player, current: true }
+      : { ...player, current: false}
+     })
   }
 
   avalibleCard( card: iCard ) {

@@ -1,4 +1,5 @@
 <div class="container">
+  <!-- CENTRAL DECK -->
   <div class="row">
     <div class="col s12 dropped-deck">
       <div class="card-container" *ngFor="let card of droppedDeck"
@@ -17,36 +18,44 @@
         </div>
     </div>
   </div>
+
+  <!-- PLAYERS LIST -->
   <div class="row">
-    <div class="col s12 player-deck">
-        <div class="card-container" *ngFor="let card of player.deck"
-        [style.width]="100 / player.deck.length + '%'">
-          <mat-card [style.backgroundColor]="card.color | cardColor: 'color'"
-          class="card mat-elevation-z5"
-          (click)="dropCard(card)"
-          [ngClass]="{'unavalible': !avalibleCard(card)}"
-          >
-            <mat-card-content>
-              <div class="card-value" [innerHtml]="card | cardValue:'small'"></div>
-              <div class="big-value" >
-                <span class="front" [innerHtml]="card | cardValue:'big'"></span>
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </div>
-    </div>
+    <ng-container *ngFor="let player of players; index as i">
+      <div class="col s12 player-deck">
+          <p>{{player.nick}}</p> <i class="fas fa-dot-circle red-text"
+          *ngIf="player.current"></i>
+          <div class="card-container" *ngFor="let card of player.deck"
+          [style.width]="100 / player.deck.length + '%'">
+            <mat-card [style.backgroundColor]="card.color | cardColor: 'color'"
+            class="card mat-elevation-z5"
+            (click)="dropCard(card)"
+            [ngClass]="{'unavalible': !avalibleCard(card)}"
+            >
+              <mat-card-content>
+                <div class="card-value" [innerHtml]="card | cardValue:'small'"></div>
+                <div class="big-value" >
+                  <span class="front" [innerHtml]="card | cardValue:'big'"></span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+      </div>
+      <div class="col s12">
+        <button *ngIf="player.current" mat-raised-button color="primary"
+        (click)="getCard(i)" >
+          Tomar una carta
+        </button>
+      </div>
+    </ng-container>
   </div>
   <div class="row">
     <div class="col s12">
+      Cartas disponibles: {{table.deck.length}}
       <button mat-raised-button color="primary"
-      (click)="getCard()" >
-        Tomar una carta
+      (click)="getStarted()">
+        Reiniciar partida
       </button>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col s12">
-      Cartas disponibles: {{newTable.deck.length}}
       <button  *ngIf="colorSelected"
       mat-raised-button
       disable

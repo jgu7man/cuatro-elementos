@@ -5,9 +5,13 @@ import { TableModel } from '../components/table/table.model';
 @Injectable({
   providedIn: 'root'
 })
-export class CurrentTableService {
+export class TableService {
 
-  table$ = new BehaviorSubject<TableModel>( new TableModel() )
+  table$ = new BehaviorSubject<TableModel | null>(null)
 
-  constructor() { }
+  constructor () { }
+
+  initTable() {
+    const table = new TableModel()
+  }
 }

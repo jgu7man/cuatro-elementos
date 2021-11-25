@@ -8,7 +8,7 @@ export class TableModel {
   constructor(
   ) {
     this.id = Math.random().toString( 36 ).substring( 6 )
-    this.deck = Deck
+    this.deck = Deck.map(c => c)
     this.created = new Date()
   }
 }
