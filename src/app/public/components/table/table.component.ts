@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { iPlayer, PlayerModel } from '../lobby/player.model';
 import { SelectColorDialog } from '../select-color/select-color.dialog';
 import { WinnerDialog } from '../winner/winner.dialog';
-import { ColorType, iCard, TableModel } from './table.model';
+import { ColorType, Deck, iCard, TableModel } from './table.model';
 import { first } from 'rxjs/operators'
 
 @Component({
@@ -13,7 +13,7 @@ import { first } from 'rxjs/operators'
 export class TableComponent implements OnInit {
 
   // idTable: string
-  table!: TableModel
+  table?: TableModel
   // player: PlayerModel
   droppedDeck: iCard[] = []
   colorSelected?: ColorType
@@ -22,30 +22,45 @@ export class TableComponent implements OnInit {
 
   constructor (
     private _dialog: MatDialog
-  ) {}
+  ) {
 
-  getStarted() {
-    this.droppedDeck = []
-    this.table = new TableModel();
-    // this.idTable = this.newTable.id
-    this.players = [
-      new PlayerModel( 'jorge' ),
-      new PlayerModel( 'meche' ),
-      new PlayerModel( 'julio' ),
-      new PlayerModel( 'ary' ),
-    ]
-
-    this.players[ Math.floor( Math.random() * this.players.length ) ].current = true
-    this.players.forEach( ( player, index ) => this.getFirstCards( index ) )
-
-    let startCard = this.table.deck[ Math.floor( Math.random() * this.table.deck.length ) ]
-    this.droppedDeck.push( startCard )
-    this.table.deck.splice( this.table.deck.indexOf(startCard), 1 )
   }
 
   ngOnInit(): void {
-    this.getStarted()
+    this.table = new TableModel()
   }
+
+  addPlayer() {
+    this.players.push(new PlayerModel())
+  }
+
+  getStarted() {
+    if (this.table) {
+      this.droppedDeck = []
+      this.table.deck = Deck.map(c => c)
+
+      const startPlayer = this.players[ Math.floor( Math.random() * this.players.length ) ]
+      startPlayer.current = true
+      startPlayer.allowTake = true
+
+      this.players.forEach( ( player, index ) => this.getFirstCards( index ) )
+
+      let startCard
+
+      do {
+        startCard = this.table.deck[ Math.floor( Math.random() * this.table.deck.length ) ]
+
+        if ( startCard.color !== 'blk' ) {
+          this.droppedDeck.push( startCard )
+          this.table.deck.splice( this.table.deck.indexOf(startCard), 1 )
+        }
+
+      } while (  startCard && startCard.color === 'blk' )
+
+    }
+  }
+
+
 
   getFirstCards(player: number): void {
     for ( var i = 0; i < 7; i++ ){
@@ -54,14 +69,27 @@ export class TableComponent implements OnInit {
   }
 
   getCard(player: number) {
-    if ( this.table.deck.length > 0 ) {
-      const card = this.table.deck[ Math.floor( Math.random() * this.table.deck.length ) ]
+    if (this.table && this.table.deck) {
+      if ( this.table.deck.length > 0 ) {
+        const card = this.table.deck[ Math.floor( Math.random() * this.table.deck.length ) ]
 
-      this.players[ player ].deck.push( card )
-      this.table.deck.splice(
-        this.table.deck.indexOf(card), 1
-      )
+        this.players[ player ].deck.push( card )
+        this.table.deck.splice(
+          this.table.deck.indexOf(card), 1
+        )
+      }
     }
+  }
+
+  takeCard(player:number) {
+    if ( this.players[ player ].allowTake ) {
+      this.getCard( player )
+      this.players[ player ].allowTake = false
+    }
+  }
+
+  letTurn() {
+    this.changeTurn()
   }
 
   get current() {
@@ -123,8 +151,8 @@ export class TableComponent implements OnInit {
   changeTurn() {
     this.players = this.players.map( ( player, index ) => {
       return index === this.next
-      ? { ...player, current: true }
-      : { ...player, current: false}
+      ? { ...player, current: true, allowTake: true }
+      : { ...player, current: false, allowTake: false}
      })
   }
 
@@ -144,5 +172,11 @@ export class TableComponent implements OnInit {
       this.colorSelected = color;
     })
 
+  }
+  restart() {
+    this.players.forEach( player => {
+      player.deck = []
+    } )
+    this.getStarted()
   }
 }

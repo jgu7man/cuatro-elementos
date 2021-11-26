@@ -3,12 +3,11 @@ import firebase from 'firebase/app'
 
 export class TableModel {
   public id: string;
-  public deck: iCard[]
+  public deck?: iCard[]
   public created: Date
   constructor(
   ) {
     this.id = Math.random().toString( 36 ).substring( 6 )
-    this.deck = Deck.map(c => c)
     this.created = new Date()
   }
 }
