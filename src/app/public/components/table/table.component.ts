@@ -4,7 +4,11 @@ import { iPlayer, PlayerModel } from '../lobby/player.model';
 import { SelectColorDialog } from '../select-color/select-color.dialog';
 import { WinnerDialog } from '../winner/winner.dialog';
 import { ColorType, Deck, iCard, TableModel } from './table.model';
-import { first } from 'rxjs/operators'
+import { first, map, mergeMap } from 'rxjs/operators'
+import { PlayerService } from '../../services/player.service';
+import { TableService } from '../../services/table.service';
+import { ActivatedRoute } from '@angular/router';
+import { SetNicknameDialog } from '../set-nickname/set-nickname.dialog';
 
 @Component({
   templateUrl: './table.component.html',
@@ -19,15 +23,26 @@ export class TableComponent implements OnInit {
   colorSelected?: ColorType
   players: PlayerModel[] = []
   clockDirection: boolean = true
+  private tid: string
+  private pid: string
 
   constructor (
-    private _dialog: MatDialog
+    private _dialog: MatDialog,
+    private _player: PlayerService,
+    private _table: TableService,
+    private _route: ActivatedRoute
   ) {
-
+    this.tid = this._route.snapshot.params['tid'];
+    this.pid = this._route.snapshot.queryParams['p'];
   }
 
   ngOnInit(): void {
-    this.table = new TableModel()
+    this._table.initTable( this.tid ).pipe(
+    ).subscribe( async table => {
+      console.log( table )
+      this._player.setCurrentPlayer(this.tid, this.pid)
+      this._player.current$.subscribe( player => console.log( player ) )
+    })
   }
 
   addPlayer() {

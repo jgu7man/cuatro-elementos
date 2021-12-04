@@ -1,0 +1,21 @@
+<p mat-dialog-title>Escribe tu nombre</p>
+<mat-dialog-content>
+  <mat-form-field appearance="outline">
+    <mat-label>Nickname</mat-label>
+    <input
+    matInput
+    type="text"
+    name="name"
+    [formControl]="nameCtrl"
+    >
+    <mat-error *ngIf="nameCtrl.hasError('required')">
+      Oye, es necesario que escribas tu nombre para poder jugar. Si no tienes, inventa uno
+    </mat-error>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions
+style="display: flex; justify-content: center;">
+    <button mat-raised-button
+    [mat-dialog-close]="nameCtrl.value"
+    >Ok!</button>
+</mat-dialog-actions>

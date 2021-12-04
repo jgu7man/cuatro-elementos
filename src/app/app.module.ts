@@ -7,6 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FirebaseModule } from 'src/shared/firebase.module';
 import { AngularFireModule } from '@angular/fire';
 import { environment } from 'src/environments/environment';
+import { MaterialModule } from 'src/shared/material.module';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import { environment } from 'src/environments/environment';
     AppRoutingModule,
     BrowserAnimationsModule,
     FirebaseModule,
+    MaterialModule,
     AngularFireModule.initializeApp(environment.firebaseConfig)
   ],
   providers: [],

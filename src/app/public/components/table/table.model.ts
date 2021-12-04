@@ -2,12 +2,14 @@ import { iPlayer } from "../lobby/player.model";
 import firebase from 'firebase/app'
 
 export class TableModel {
-  public id: string;
+  readonly id: string;
+  readonly created: Date | firebase.firestore.Timestamp
+
   public deck?: iCard[]
-  public created: Date
-  constructor(
+
+  constructor (
   ) {
-    this.id = Math.random().toString( 36 ).substring( 6 )
+    this.id = Math.random().toString( 36 ).substring( 4 )
     this.created = new Date()
   }
 }
