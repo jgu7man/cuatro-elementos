@@ -8,7 +8,6 @@ import { first, map, mergeMap } from 'rxjs/operators'
 import { PlayerService } from '../../services/player.service';
 import { TableService } from '../../services/table.service';
 import { ActivatedRoute } from '@angular/router';
-import { SetNicknameDialog } from '../set-nickname/set-nickname.dialog';
 
 @Component({
   templateUrl: './table.component.html',
@@ -28,8 +27,8 @@ export class TableComponent implements OnInit {
 
   constructor (
     private _dialog: MatDialog,
-    private _player: PlayerService,
-    private _table: TableService,
+    public player_: PlayerService,
+    public table_: TableService,
     private _route: ActivatedRoute
   ) {
     this.tid = this._route.snapshot.params['tid'];
@@ -37,12 +36,9 @@ export class TableComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this._table.initTable( this.tid ).pipe(
-    ).subscribe( async table => {
-      console.log( table )
-      this._player.setCurrentPlayer(this.tid, this.pid)
-      this._player.current$.subscribe( player => console.log( player ) )
-    })
+    this.table_.initTable( this.tid ).pipe().subscribe()
+    this.player_.setCurrentPlayer(this.tid, this.pid)
+    this.table_.listenPLayers( this.tid).subscribe()
   }
 
   addPlayer() {

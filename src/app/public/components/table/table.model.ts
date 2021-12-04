@@ -6,6 +6,7 @@ export class TableModel {
   readonly created: Date | firebase.firestore.Timestamp
 
   public deck?: iCard[]
+  public started: boolean = false
 
   constructor (
   ) {
@@ -14,11 +15,8 @@ export class TableModel {
   }
 }
 
-export interface iTable {
-  deck: iCard[],
-  players: iPlayer[],
-  created: Date | firebase.firestore.Timestamp,
-  id: string
+export interface iTable extends TableModel {
+  created: firebase.firestore.Timestamp
 }
 
 export type ColorType = 'red' | 'grn' | 'blu' | 'ylw' | 'blk'

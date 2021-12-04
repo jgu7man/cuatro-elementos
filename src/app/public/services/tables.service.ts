@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { catchError, first } from 'rxjs/operators';
 import { SetNicknameDialog } from '../components/set-nickname/set-nickname.dialog';
-import { TableModel } from '../components/table/table.model';
+import { iTable, TableModel } from '../components/table/table.model';
 import { PlayerService } from './player.service';
 
 @Injectable({
@@ -37,7 +37,7 @@ export class TablesService {
   }
 
   get() {
-    return this._afs.collection<TableModel>( 'tables' )
+    return this._afs.collection<iTable>( 'tables' )
       .valueChanges().pipe(
         catchError( error => {
           console.error(error);

@@ -1,16 +1,18 @@
 <div class="container">
-  <ng-container *ngIf="table">
+  <ng-container *ngIf="(table_.current$ | async) as table">
     <div class="row">
       <div class="col l3">
         <h2>Mesa {{table.id}}</h2>
+
         <h2>Jugadores</h2>
-        <mat-list>
+        <mat-list *ngIf="(table_.players$ | async) as players">
           <mat-list-item *ngFor="let player of players">
             <mat-icon mat-list-icon>person</mat-icon>
             <div mat-line>{{player.nick}}</div>
             <div mat-line> Cartas {{player.deck.length}} </div>
           </mat-list-item>
         </mat-list>
+
         <ng-container *ngIf="table.deck">
           <div class="row">
             <div class="col s12">
@@ -29,7 +31,9 @@
           </div>
         </ng-container>
       </div>
+
       <div class="col l9">
+
         <ng-container *ngIf="table.deck; else unStarted">
           <!-- CENTRAL DECK -->
         <div class="row">
@@ -93,10 +97,12 @@
         </div>
 
         </ng-container>
+
         <ng-template #unStarted>
           <button mat-raised-button color="primary"
-          (click)="getStarted()"
-          [disabled]="players.length < 2"
+          (click)="table_.getStarted()"
+          *ngIf="(table_.players$ | async) as players"
+          [disabled]="players.length < 0"
           >Iniciar partida</button>
           <button mat-raised-button color="accent"
           (click)="addPlayer()"
