@@ -16,7 +16,7 @@ import { ActivatedRoute } from '@angular/router';
 export class TableComponent implements OnInit {
 
   // idTable: string
-  table?: TableModel
+  // table?: TableModel
   // player: PlayerModel
   droppedDeck: iCard[] = []
   colorSelected?: ColorType
@@ -24,6 +24,8 @@ export class TableComponent implements OnInit {
   clockDirection: boolean = true
   private tid: string
   private pid: string
+  public rid!: number
+
 
   constructor (
     private _dialog: MatDialog,
@@ -32,140 +34,43 @@ export class TableComponent implements OnInit {
     private _route: ActivatedRoute
   ) {
     this.tid = this._route.snapshot.params['tid'];
-    this.pid = this._route.snapshot.queryParams['p'];
+    this.pid = JSON.parse( localStorage.getItem( 'crtPyr' )! )
+    this._route.queryParams.subscribe( queryParams => {
+      this.rid = +queryParams['rid']
+    });
   }
 
-  ngOnInit(): void {
-    this.table_.initTable( this.tid ).pipe().subscribe()
-    this.player_.setCurrentPlayer(this.tid, this.pid)
-    this.table_.listenPLayers( this.tid).subscribe()
+  async ngOnInit() {
+    console.log( this.rid )
+    this.table_.initTable( this.tid, this.rid).pipe().subscribe()
+    this.table_.listenPLayers().subscribe()
+    this.player_.listenInTable(this.tid, this.rid).subscribe()
+    if ( !this.pid ) this.pid = await this.player_.init()
+
   }
 
   addPlayer() {
-    this.players.push(new PlayerModel())
-  }
-
-  getStarted() {
-    if (this.table) {
-      this.droppedDeck = []
-      this.table.deck = Deck.map(c => c)
-
-      const startPlayer = this.players[ Math.floor( Math.random() * this.players.length ) ]
-      startPlayer.current = true
-      startPlayer.allowTake = true
-
-      this.players.forEach( ( player, index ) => this.getFirstCards( index ) )
-
-      let startCard
-
-      do {
-        startCard = this.table.deck[ Math.floor( Math.random() * this.table.deck.length ) ]
-
-        if ( startCard.color !== 'blk' ) {
-          this.droppedDeck.push( startCard )
-          this.table.deck.splice( this.table.deck.indexOf(startCard), 1 )
-        }
-
-      } while (  startCard && startCard.color === 'blk' )
-
-    }
+    this.player_.getIn(this.tid, this.rid, this.pid)
   }
 
 
 
-  getFirstCards(player: number): void {
-    for ( var i = 0; i < 7; i++ ){
-      this.getCard(player)
-    }
-  }
 
-  getCard(player: number) {
-    if (this.table && this.table.deck) {
-      if ( this.table.deck.length > 0 ) {
-        const card = this.table.deck[ Math.floor( Math.random() * this.table.deck.length ) ]
+  // get current() {
+  //   return this.players.findIndex( p => p.current === true)
+  // }
 
-        this.players[ player ].deck.push( card )
-        this.table.deck.splice(
-          this.table.deck.indexOf(card), 1
-        )
-      }
-    }
-  }
-
-  takeCard(player:number) {
-    if ( this.players[ player ].allowTake ) {
-      this.getCard( player )
-      this.players[ player ].allowTake = false
-    }
-  }
-
-  letTurn() {
-    this.changeTurn()
-  }
-
-  get current() {
-    return this.players.findIndex( p => p.current === true)
-  }
-
-  get next() {
-    const next = this.clockDirection
-      ? this.current + 1 === this.players.length ? 0 : this.current + 1
-      : this.current - 1 === -1 ? this.players.length - 1 : this.current - 1
-    return next
-  }
-
-  dropCard( card: iCard ) {
-    if ( this.avalibleCard( card ) ) {
-      const indexCard = this.players[this.current].deck.indexOf( card )
-      this.players[this.current].deck.splice( indexCard, 1 )
-      this.droppedDeck.push( card )
-
-      const deckLength = this.players[ this.current ].deck.length
-      if ( deckLength === 0 ) {
-        this._dialog.open( WinnerDialog, {
-          disableClose: true,
-          data: this.players[ this.current ]
-        } ).afterClosed().pipe( first() ).subscribe( restart => {
-          if(restart) this.getStarted()
-        })
-      } else if ( deckLength === 1 ) {
-        this.setCardValue(card)
-      } else this.setCardValue(card)
+  // get next() {
+  //   const next = this.clockDirection
+  //     ? this.current + 1 === this.players.length ? 0 : this.current + 1
+  //     : this.current - 1 === -1 ? this.players.length - 1 : this.current - 1
+  //   return next
+  // }
 
 
-      this.changeTurn()
 
-    }
-  }
 
-  setCardValue(card: iCard) {
-    if ( card.value == 'tu' ) {
-      this.clockDirection = !this.clockDirection
-    } else if ( card.value == 'bl' ) {
-      this.changeTurn()
-    } else if ( card.value == '+2' ) {
-      this.getCard(this.next)
-      this.getCard(this.next)
-    } else if ( card.value == '+4' ) {
-      [ 1, 2, 3, 4 ].forEach( card => {
-        this.getCard(this.next)
-      })
-    }
-    if ( card.color === 'blk' ) {
-      this.openColorSelecter()
-    }
-    if ( this.colorSelected ) {
-      delete this.colorSelected
-    }
-  }
 
-  changeTurn() {
-    this.players = this.players.map( ( player, index ) => {
-      return index === this.next
-      ? { ...player, current: true, allowTake: true }
-      : { ...player, current: false, allowTake: false}
-     })
-  }
 
   avalibleCard( card: iCard ) {
     const last = this.droppedDeck[this.droppedDeck.length -1]
@@ -176,18 +81,11 @@ export class TableComponent implements OnInit {
     }
   }
 
-  openColorSelecter() {
-    this._dialog.open( SelectColorDialog, {
-      disableClose: true
-    } ).afterClosed().subscribe( color => {
-      this.colorSelected = color;
-    })
 
-  }
-  restart() {
-    this.players.forEach( player => {
-      player.deck = []
-    } )
-    this.getStarted()
-  }
+  // restart() {
+  //   this.players.forEach( player => {
+  //     player.deck = []
+  //   } )
+  //   this.getStarted()
+  // }
 }

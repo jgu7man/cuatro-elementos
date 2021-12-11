@@ -6,12 +6,15 @@ export class TableModel {
   readonly created: Date | firebase.firestore.Timestamp
 
   public deck?: iCard[]
+  public droppedDeck: iCard[] = []
   public started: boolean = false
+  public rounds: number[]
 
   constructor (
   ) {
     this.id = Math.random().toString( 36 ).substring( 4 )
     this.created = new Date()
+    this.rounds = [this.created.getTime()]
   }
 }
 

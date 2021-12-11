@@ -26,10 +26,11 @@ export class TablesService {
         .doc(table.id)
         .set( { ...table } )
 
-      const pid = await this._player.init(table.id)
-
       this._router.navigate( [ '/table', table.id ], {
-        queryParams: { p: pid }} )
+        queryParams: {
+          rid: table.rounds[0]
+        }
+      } )
       return
     } catch (error) {
       return console.error(error)
