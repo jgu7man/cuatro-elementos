@@ -3,7 +3,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { BehaviorSubject, Observable, Subscription, SubscriptionLike } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { iPlayer, PlayerModel, TablePlayer } from '../components/lobby/player.model';
+import { iPlayer, PlayerModel, TablePlayer } from '../models/player.model';
 import { SetNicknameDialog } from '../components/set-nickname/set-nickname.dialog';
 
 @Injectable({
@@ -42,6 +42,7 @@ export class PlayerService {
       .valueChanges()
       .pipe(
         map( changes => {
+          console.log( changes )
           this.current$.next( changes )
         } )
       )
@@ -56,8 +57,6 @@ export class PlayerService {
       const playerRef = this._afs.doc<TablePlayer>( playerPath )
 
       t.set(playerRef.ref, { ...crtPlayer } )
-      // this._playerSubscription = playerRef.valueChanges()
-      //   .subscribe( player => this.current$.next( player ) )
       return
     })
 

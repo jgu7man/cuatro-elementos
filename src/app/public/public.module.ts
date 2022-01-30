@@ -14,6 +14,9 @@ import { SelectColorDialog } from './components/select-color/select-color.dialog
 import { ReactiveFormsModule } from '@angular/forms';
 import { WinnerDialog } from './components/winner/winner.dialog';
 import { SetNicknameDialog } from './components/set-nickname/set-nickname.dialog';
+import { CardComponent } from './components/card/card.component';
+import { OccupancyPipe } from './pipes/occupancy.pipe';
+import { AreInPipe } from './pipes/are-in.pipe';
 
 
 @NgModule({
@@ -27,13 +30,20 @@ import { SetNicknameDialog } from './components/set-nickname/set-nickname.dialog
     AvalibleCardPipe,
     SelectColorDialog,
     WinnerDialog,
-    SetNicknameDialog
+    SetNicknameDialog,
+    CardComponent,
+    OccupancyPipe,
+    AreInPipe
   ],
   imports: [
     CommonModule,
     PublicRoutingModule,
     MaterialModule,
     ReactiveFormsModule
+  ],
+  exports: [
+    OccupancyPipe,
+    AreInPipe
   ]
 })
 export class PublicModule { }

@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ColorType, iCard } from '../components/table/table.model';
+import { ColorType, iCard } from '../models/table.model';
 
 @Pipe({
   name: 'cardColor'

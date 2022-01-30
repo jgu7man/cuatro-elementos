@@ -1,19 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { iPlayer, PlayerModel } from '../lobby/player.model';
+import { iPlayer, PlayerModel } from '../../models/player.model';
 import { SelectColorDialog } from '../select-color/select-color.dialog';
 import { WinnerDialog } from '../winner/winner.dialog';
-import { ColorType, Deck, iCard, TableModel } from './table.model';
-import { first, map, mergeMap } from 'rxjs/operators'
+import { ColorType, Deck, iCard, TableModel } from '../../models/table.model';
+import { concatMap, count, first, map, mergeMap, tap } from 'rxjs/operators'
 import { PlayerService } from '../../services/player.service';
 import { TableService } from '../../services/table.service';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss']
 })
-export class TableComponent implements OnInit {
+export class TableComponent implements OnInit, OnDestroy {
 
   // idTable: string
   // table?: TableModel
@@ -26,6 +27,9 @@ export class TableComponent implements OnInit {
   private pid: string
   public rid!: number
 
+  private tableSubscription?: Subscription
+  private playaersSubscription?: Subscription
+  private playerInTableSubscription?: Subscription
 
   constructor (
     private _dialog: MatDialog,
@@ -42,10 +46,19 @@ export class TableComponent implements OnInit {
 
   async ngOnInit() {
     console.log( this.rid )
-    this.table_.initTable( this.tid, this.rid).pipe().subscribe()
-    this.table_.listenPLayers().subscribe()
-    this.player_.listenInTable(this.tid, this.rid).subscribe()
+    this.tableSubscription =
+      this.table_.initTable( this.tid ).pipe(
+        concatMap( () => this.table_.listenPLayers().pipe(count()) ),
+        tap( event => console.log( event ) ),
+      ).subscribe()
+    // this.playaersSubscription =
+    this.playerInTableSubscription =
+      this.player_.listenInTable(this.tid, this.rid).subscribe()
     if ( !this.pid ) this.pid = await this.player_.init()
+
+  }
+
+  ngOnDestroy(): void {
 
   }
 
@@ -53,7 +66,11 @@ export class TableComponent implements OnInit {
     this.player_.getIn(this.tid, this.rid, this.pid)
   }
 
-
+  async getStarted() {
+    await this.table_.getStarted()
+    this.playerInTableSubscription =
+      this.player_.listenInTable(this.tid, this.rid).subscribe()
+  }
 
 
   // get current() {

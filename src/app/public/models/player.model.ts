@@ -1,5 +1,5 @@
 import firebase from 'firebase/app'
-import { iCard } from '../table/table.model'
+import { iCard } from './table.model'
 
 export class PlayerModel {
   public nick: string

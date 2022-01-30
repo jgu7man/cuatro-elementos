@@ -2,15 +2,18 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { catchError, first } from 'rxjs/operators';
-import { SetNicknameDialog } from '../components/set-nickname/set-nickname.dialog';
-import { iTable, TableModel } from '../components/table/table.model';
+import { BehaviorSubject } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { TablePlayer } from '../models/player.model';
+import { iTable, TableModel } from '../models/table.model';
 import { PlayerService } from './player.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TablesService {
+
+  list$ = new BehaviorSubject<iTable[] | null>(null)
 
   constructor (
     private _afs: AngularFirestore,
@@ -25,10 +28,22 @@ export class TablesService {
       await this._afs.collection<TableModel>( 'tables' )
         .doc(table.id)
         .set( { ...table } )
+      
+      if ( !this._player.current$.value ) { 
+        const pid = JSON.parse( localStorage.getItem( 'crtPyr' )! )
+        console.log( `players/${ pid }` )
+        await this._afs.doc<TablePlayer>( `players/${ pid }` ).get().pipe(
+          tap( p => console.log( p ) ),
+          map(p =>{ if (p.exists) this._player.current$.next(p.data()!)}),
+        ).toPromise()
+      }
+
+      console.log( this._player.current$.value )
+      await this._player.getIn( table.id, table.currentRound, this._player.current$.value!.id )
 
       this._router.navigate( [ '/table', table.id ], {
         queryParams: {
-          rid: table.rounds[0]
+          rid: table.currentRound
         }
       } )
       return
@@ -47,5 +62,18 @@ export class TablesService {
       )
   }
 
+  listen() {
+    return this._afs.collection<iTable>( 'tables' )
+      .valueChanges().pipe(
+        map( ( tables: iTable[] ) => {
+          this.list$.next( tables )
+          return tables
+        }),
+        catchError( error => {
+          console.error(error);
+          return []
+        })
+      )
+  }
 
 }

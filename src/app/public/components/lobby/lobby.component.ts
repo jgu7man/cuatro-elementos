@@ -1,26 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { TablesService } from '../../services/tables.service';
-import { TableModel } from '../table/table.model';
+import { TableModel } from '../../models/table.model';
 
 @Component({
   templateUrl: './lobby.component.html',
   styleUrls: ['./lobby.component.scss']
 })
-export class LobbyComponent implements OnInit {
+export class LobbyComponent implements OnInit, OnDestroy {
 
-  public list$: Observable<TableModel[]>
+  private tablesSubscription: Subscription
   constructor (
     public tables: TablesService,
   ) {
-    this.list$ = this.tables.get()
+    this.tablesSubscription = this.tables.listen().subscribe()
   }
 
   ngOnInit(): void {
   }
 
-
+  ngOnDestroy(): void {
+    this.tablesSubscription.unsubscribe()
+  }
 
 
 }

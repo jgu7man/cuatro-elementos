@@ -1,0 +1,16 @@
+<ng-container *ngIf="card">
+  <div class="card-container" [style.width]="width">
+    <mat-card [style.backgroundColor]="card.color | cardColor:'color'"
+    class="card mat-elevation-z5"
+    (click)="table_.dropCard(card)"
+    [ngClass]="{'unavalible': !(card | avalibleCard | async) && playerDeck }"
+    >
+      <mat-card-content>
+        <div class="card-value" [innerHtml]="card | cardValue:'small'"></div>
+        <div class="big-value" >
+          <span class="front" [innerHtml]="card | cardValue:'big'"></span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</ng-container>

@@ -9,9 +9,25 @@
   </div>
   <div class="row">
     <div class="col s12">
-      <mat-list>
-        <mat-list-item>Mesa</mat-list-item>
-      </mat-list>
+      <ng-container *ngIf="(tables.list$ | async) as tableList; else loading">
+        <ng-container *ngFor="let item of tableList">
+          <mat-list [routerLink]="['/table', item.id]" 
+          [queryParams]="{rid: item.currentRound}">
+            {{item.currentRound}}
+            <mat-list-item class="table-item-list" >
+              <mat-icon mat-list-icon>table_restaurant</mat-icon>
+              <div mat-line>{{item.id}}</div>
+              <div mat-line>
+                <!-- <mat-icon>groups</mat-icon> -->
+                {{item | occupancy | async}}/10 Jugadores
+              </div>
+            </mat-list-item>
+          </mat-list>
+        </ng-container>
+      </ng-container>
+      <ng-template #loading >
+      
+      </ng-template>
     </div>
   </div>
 </div>

@@ -1,4 +1,4 @@
-import { iPlayer } from "../lobby/player.model";
+import { iPlayer } from "./player.model";
 import firebase from 'firebase/app'
 
 export class TableModel {
@@ -8,13 +8,18 @@ export class TableModel {
   public deck?: iCard[]
   public droppedDeck: iCard[] = []
   public started: boolean = false
-  public rounds: number[]
+  public currentRound: number
+  
+  public clockDirection: boolean = true
+  public colorSelected?: ColorType
+  public rounds: number[] = []
 
   constructor (
   ) {
     this.id = Math.random().toString( 36 ).substring( 4 )
     this.created = new Date()
-    this.rounds = [this.created.getTime()]
+    this.currentRound = this.created.getTime()
+    this.rounds.push( this.currentRound )
   }
 }
 

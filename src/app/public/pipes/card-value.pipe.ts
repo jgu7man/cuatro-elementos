@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { cardValueMap, iCard } from '../components/table/table.model';
+import { cardValueMap, iCard } from '../models/table.model';
 
 @Pipe({
   name: 'cardValue'

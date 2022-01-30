@@ -1,7 +1,7 @@
 import { Location } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { iPlayer } from '../lobby/player.model';
+import { iPlayer } from '../../models/player.model';
 
 @Component({
   templateUrl: './winner.dialog.html',
