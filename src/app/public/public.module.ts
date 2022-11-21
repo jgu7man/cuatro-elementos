@@ -17,6 +17,8 @@ import { SetNicknameDialog } from './components/set-nickname/set-nickname.dialog
 import { CardComponent } from './components/card/card.component';
 import { OccupancyPipe } from './pipes/occupancy.pipe';
 import { AreInPipe } from './pipes/are-in.pipe';
+import { WithinDeckDirective } from './directives/within-deck.directive';
+import { AvalibleDropPipe } from './pipes/avalible-drop.pipe';
 
 
 @NgModule({
@@ -28,12 +30,14 @@ import { AreInPipe } from './pipes/are-in.pipe';
     CardValuePipe,
     CardBigValuePipe,
     AvalibleCardPipe,
+    AvalibleDropPipe,
     SelectColorDialog,
     WinnerDialog,
     SetNicknameDialog,
     CardComponent,
     OccupancyPipe,
-    AreInPipe
+    AreInPipe,
+    WithinDeckDirective
   ],
   imports: [
     CommonModule,

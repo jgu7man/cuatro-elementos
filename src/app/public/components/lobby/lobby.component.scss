@@ -4,3 +4,17 @@
     background: #f5f5f5;
   }
 }
+
+#table-list-container {
+  min-height: 75vh;
+  max-height: 75vh;
+  #table-list {
+    width: 50%;
+    min-width: 420px;
+  }
+}
+
+mat-icon.sm {
+  font-size: 12px !important;
+  float: right;
+}

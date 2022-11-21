@@ -11,8 +11,21 @@ import { SetNicknameDialog } from '../components/set-nickname/set-nickname.dialo
 })
 export class PlayerService {
 
-  current$ = new BehaviorSubject<TablePlayer | undefined>( undefined );
+  public current$ = new BehaviorSubject<TablePlayer | undefined>( undefined );
+  private _tid?: string;
+  private _rid?: number;
+  get playerPath(): string {
+    if ( !this._tid ) throw { code: 'table/not-found' }
+    if ( !this._rid ) throw { code: 'round/not-found' }
+    return `tables/${ this._tid }/${ this._rid }/${ this.currentPlayerID }`
+  }
+  get currentPlayerID(): string {
+    const cache = localStorage.getItem( 'crtPyr' )
+    if ( !cache ) throw {code: 'player/not-cached'}
+    return JSON.parse(cache)
+  }
   private _playerSubscription?: Subscription
+
   constructor (
     private _afs: AngularFirestore
     , private _dialog: MatDialog
@@ -36,9 +49,10 @@ export class PlayerService {
   }
 
   listenInTable( tid: string, rid: number ) {
-    const pid = JSON.parse( localStorage.getItem( 'crtPyr' )! )
-    const playerPath = `tables/${ tid }/${ rid }/${ pid }`
-    return this._afs.doc<TablePlayer>( playerPath )
+    this._tid = tid
+    this._rid = rid
+
+    return this._afs.doc<TablePlayer>( this.playerPath )
       .valueChanges()
       .pipe(
         map( changes => {
@@ -67,4 +81,6 @@ export class PlayerService {
   leave() {
     if(this._playerSubscription) this._playerSubscription.unsubscribe()
   }
+
+
 }

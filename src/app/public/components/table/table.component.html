@@ -1,7 +1,7 @@
 <div class="container">
   <ng-container *ngIf="(table_.table$ | async) as table">
     <div class="row">
-      <div class="col l3">
+      <div class="col s12 l3">
         <h2>Mesa {{table.id}}</h2>
 
         <h2>Jugadores</h2>
@@ -32,46 +32,52 @@
         </ng-container>
       </div>
 
-      <div class="col l9">
+      <div class="col s12 l9">
 
-        <ng-container *ngIf="table.deck; else unStarted">
-          <!-- CENTRAL DECK -->
+        <ng-container *ngIf="table.started; else unStarted">
+          <!-- DROPPED DECK -->
 
-          <div class="row">
+          <div class="row" id="dropped-deck-container">
             <div class="col s12 dropped-deck">
-              <ng-container *ngFor="let card of table.droppedDeck">
-                <app-card [card]="card" 
-                [width]="100 / droppedDeck.length + '%'"
-                ></app-card>
+              <ng-container *ngIf="table.droppedDeck.length">
+                <ng-container *ngFor="let card of table.droppedDeck">
+                  <app-card
+                  [appWithinDeck]="table.droppedDeck.length"
+                  [card]="card"
+                  ></app-card>
+                </ng-container>
               </ng-container>
             </div>
           </div>
 
-          <!-- PLAYERS DECK -->
-          <div class="row">
+          <!-- PLAYER AREA -->
+          <div class="row" id="player-deck-container">
             <ng-container *ngIf="(player_.current$ | async) as player">
+
+              <!-- PLAYER HEADER -->
+              <div class="col s12">
+                <p>
+                  {{player.nick}}
+                  <i class="fas fa-dot-circle red-text"
+                  *ngIf="player.current"></i>
+                </p>
+              </div>
+
               <div class="col s12 player-deck">
-
-                <p>{{player.nick}}</p>
-                <i class="fas fa-dot-circle red-text"
-                *ngIf="player.current"></i>
-
                 <ng-container *ngFor="let card of player.deck">
-                  <app-card 
-                  [card]="card" 
-                  [width]="100 / player.deck.length + '%'"
+                  <app-card
+                  [card]="card"
+                  [appWithinDeck]="player.deck.length"
                   [playerDeck]="true"
                   ></app-card>
                 </ng-container>
-                
               </div>
-
 
               <div class="col s12">
                 <button *ngIf="player.current"
                 mat-raised-button
                 color="primary"
-                [disabled]="!player.allowTake"
+                [disabled]="(player.deck | avaliableDrop | async)"
                 (click)="table_.takeCard(player.id)" >
                   Tomar una carta
                 </button>
@@ -89,19 +95,20 @@
         </ng-container>
 
         <ng-template #unStarted >
-          
-          <ng-container *ngIf="player_.current$ | async as player">
+
+          <ng-container *ngIf="player_.current$ | async as player; else notIn">
             <button mat-raised-button color="primary"
             (click)="table_.getStarted()"
             *ngIf="(table_.players$ | async) as players"
             [disabled]="players.length < 0"
             >Iniciar partida</button>
-            
+          </ng-container>
+          <ng-template #notIn>
             <button mat-raised-button color="accent"
-            *ngIf="!(player | areIn | async)"
             (click)="addPlayer()"
             >Unirse a la mesa</button>
-          </ng-container>
+          </ng-template>
+
 
         </ng-template>
       </div>

@@ -23,7 +23,9 @@ export class TableComponent implements OnInit, OnDestroy {
   colorSelected?: ColorType
   players: PlayerModel[] = []
   clockDirection: boolean = true
-  private tid: string
+  #tid: string = ''
+  set tid(tid: string){this.#tid = tid;}
+  get tid(): string{ return this.#tid }
   private pid: string
   public rid!: number
 
@@ -45,10 +47,10 @@ export class TableComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    console.log( this.rid )
+    // console.log( this.rid )
     this.tableSubscription =
       this.table_.initTable( this.tid ).pipe(
-        concatMap( () => this.table_.listenPLayers().pipe(count()) ),
+        concatMap( () => this.table_.listenPlayers().pipe(count()) ),
         tap( event => console.log( event ) ),
       ).subscribe()
     // this.playaersSubscription =

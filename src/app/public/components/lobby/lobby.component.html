@@ -1,33 +1,63 @@
 <div class="container">
+
   <div class="row">
     <div class="col s12">
+      <h1>Juega UNO</h1>
+    </div>
+  </div>
+
+
+
+  <div class="row">
+
+    <div class="col s12 m8 l9">
+      <p>Elige una mesa o Abre una mesa nueva</p>
+    </div>
+
+    <div class="col s12 m4 l3 right">
       <button mat-raised-button
       color="primary"
       (click)="tables.create()"
       >Abrir mesa nueva</button>
     </div>
-  </div>
-  <div class="row">
+
     <div class="col s12">
-      <ng-container *ngIf="(tables.list$ | async) as tableList; else loading">
-        <ng-container *ngFor="let item of tableList">
-          <mat-list [routerLink]="['/table', item.id]" 
-          [queryParams]="{rid: item.currentRound}">
-            {{item.currentRound}}
-            <mat-list-item class="table-item-list" >
-              <mat-icon mat-list-icon>table_restaurant</mat-icon>
-              <div mat-line>{{item.id}}</div>
-              <div mat-line>
-                <!-- <mat-icon>groups</mat-icon> -->
-                {{item | occupancy | async}}/10 Jugadores
-              </div>
-            </mat-list-item>
-          </mat-list>
-        </ng-container>
-      </ng-container>
-      <ng-template #loading >
-      
-      </ng-template>
+      <div id="table-list-container">
+        <mat-card id="table-list">
+          <mat-card-content>
+            <ng-container *ngIf="(tables.list$ | async) as tableList; else loading">
+              <ng-container *ngFor="let item of tableList">
+                <mat-list [routerLink]="['/table', item.id]"
+                [queryParams]="{rid: item.currentRound}">
+
+                  <mat-list-item class="table-item-list"
+                  [matTooltip]="item.started ? 'Esta mesa ya está jugando una partida' : 'Esta mesa está libre'">
+                    <mat-icon mat-list-icon>table_restaurant</mat-icon>
+                    <div mat-line>
+                      {{item.id}}
+                      <mat-icon class="sm"
+                      [ngClass]="{
+                        'green-text': !item.started,
+                        'yellow-text': item.started
+                      }"
+                      >circle</mat-icon>
+                    </div>
+                    <div mat-line>
+                      <!-- <mat-icon>groups</mat-icon> -->
+                      {{item | occupancy | async}}/10 Jugadores
+                    </div>
+                  </mat-list-item>
+
+                </mat-list>
+              </ng-container>
+            </ng-container>
+            <ng-template #loading >
+
+            </ng-template>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
     </div>
   </div>
 </div>

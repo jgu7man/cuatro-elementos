@@ -1,5 +1,6 @@
 import { iPlayer } from "./player.model";
 import firebase from 'firebase/app'
+export type Moment = firebase.firestore.Timestamp | Date;
 
 export class TableModel {
   readonly id: string;
@@ -9,7 +10,7 @@ export class TableModel {
   public droppedDeck: iCard[] = []
   public started: boolean = false
   public currentRound: number
-  
+
   public clockDirection: boolean = true
   public colorSelected?: ColorType
   public rounds: number[] = []
@@ -23,8 +24,13 @@ export class TableModel {
   }
 }
 
+export interface Round {
+  id: number;
+  lastMovement: Moment,
+}
+
 export interface iTable extends TableModel {
-  created: firebase.firestore.Timestamp
+  created: Moment
 }
 
 export type ColorType = 'red' | 'grn' | 'blu' | 'ylw' | 'blk'

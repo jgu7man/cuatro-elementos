@@ -28,11 +28,12 @@ export class TablesService {
       await this._afs.collection<TableModel>( 'tables' )
         .doc(table.id)
         .set( { ...table } )
-      
-      if ( !this._player.current$.value ) { 
-        const pid = JSON.parse( localStorage.getItem( 'crtPyr' )! )
-        console.log( `players/${ pid }` )
-        await this._afs.doc<TablePlayer>( `players/${ pid }` ).get().pipe(
+
+
+      if ( !this._player.current$.value ) {
+        const pid = this._player.currentPlayerID
+        console.log( `players/${ this._player.currentPlayerID }` )
+        await this._afs.doc<TablePlayer>( `players/${ this._player.currentPlayerID }` ).get().pipe(
           tap( p => console.log( p ) ),
           map(p =>{ if (p.exists) this._player.current$.next(p.data()!)}),
         ).toPromise()

@@ -1,31 +1,28 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
+// import { mergeLatest } from "rxjs/operators";
 import { iCard } from '../models/table.model';
+import { PlayerService } from '../services/player.service';
 import { TableService } from '../services/table.service';
 
 @Pipe({
-  name: 'avalibleCard'
+  name: 'avalibleCard',
 })
 export class AvalibleCardPipe implements PipeTransform {
 
   constructor (
     private _table: TableService,
+    private _player: PlayerService
   ){}
 
   transform( card: iCard ): Observable<boolean> {
-    return this._table.table$.pipe(
-      map( table => {
-        const last = table?.droppedDeck[table.droppedDeck.length -1]
-        if ( !last ) return true
-        else {
-          let table = this._table.table$.value
-          return  (last.color === card.color || last.value === card.value)  ||
-            (card.color === 'blk' || card.color === table?.colorSelected)
-        }
-
-      })
-    )
+    return combineLatest(
+      this._table.avalibleCard$( card ),
+      this._table.allowedPlayer$()
+    ).pipe( map( ( [ available, allowed ] ) => {
+      return available && allowed
+    }))
   }
 
 }
