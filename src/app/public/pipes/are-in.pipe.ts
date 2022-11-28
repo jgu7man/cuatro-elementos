@@ -1,8 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { TablePlayer } from '../models/player.model';
-import { TableService } from '../services/table.service';
+import { map, tap } from 'rxjs/operators';
+import { PlayerService } from '../services/player.service';
 
 @Pipe({
   name: 'areIn'
@@ -10,12 +9,14 @@ import { TableService } from '../services/table.service';
 export class AreInPipe implements PipeTransform {
 
   constructor (
-    private _table: TableService
+    private _player: PlayerService
   ) { }
-  
-  transform(player: TablePlayer, ...args: unknown[]): Observable<boolean> {
-    return this._table.players$.pipe(
-      map( players => players.some( p => p.id === player.id ) )
+
+  transform(tid: string, ...args: unknown[]): Observable<boolean> {
+    return this._player.current$.pipe(
+      // tap(value => console.log( value )),
+      map( player => player?.tableId === tid ),
+      // tap(value => console.log( value ))
     );
   }
 

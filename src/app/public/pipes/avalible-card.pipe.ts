@@ -18,7 +18,7 @@ export class AvalibleCardPipe implements PipeTransform {
 
   transform( card: iCard ): Observable<boolean> {
     return combineLatest(
-      this._table.avalibleCard$( card ),
+      this._table.allowedCard$( card ),
       this._table.allowedPlayer$()
     ).pipe( map( ( [ available, allowed ] ) => {
       return available && allowed

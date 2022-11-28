@@ -5,8 +5,12 @@ import { TableComponent } from './components/table/table.component';
 import { PublicComponent } from './public.component';
 
 const routes: Routes = [
-  { path: '', component: LobbyComponent },
-  { path: 'table/:tid', component: TableComponent },
+  {
+    path: '', component: PublicComponent, children: [
+      { path: '', component: LobbyComponent },
+      { path: 'table/:tid', component: TableComponent },
+    ]
+},
 ];
 
 @NgModule({

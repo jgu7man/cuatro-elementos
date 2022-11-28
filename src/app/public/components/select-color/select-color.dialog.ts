@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatRadioChange } from '@angular/material/radio';
 
 @Component({
@@ -9,10 +9,13 @@ import { MatRadioChange } from '@angular/material/radio';
 })
 export class SelectColorDialog implements OnInit {
 
-  colorCtrl: FormControl = new FormControl(null)
+  colorCtrl: FormControl = new FormControl( null )
   constructor (
-    private _dialog: MatDialogRef<SelectColorDialog>
-  ) { }
+    private _dialog: MatDialogRef<SelectColorDialog>,
+    @Inject(MAT_DIALOG_DATA) public tid: string
+  ) {
+    console.log( this.tid )
+  }
 
   ngOnInit(): void {
   }

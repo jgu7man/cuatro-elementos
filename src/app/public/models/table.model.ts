@@ -9,17 +9,21 @@ export class TableModel {
   public deck?: iCard[]
   public droppedDeck: iCard[] = []
   public started: boolean = false
-  public currentRound: number
+  public currentRound: Round
 
   public clockDirection: boolean = true
   public colorSelected?: ColorType
-  public rounds: number[] = []
+  public rounds: Round[] = []
 
   constructor (
   ) {
     this.id = Math.random().toString( 36 ).substring( 4 )
     this.created = new Date()
-    this.currentRound = this.created.getTime()
+    this.currentRound = {
+      id: this.created.getTime(),
+      lastMovement: this.created,
+      winner: ''
+    }
     this.rounds.push( this.currentRound )
   }
 }
@@ -27,6 +31,7 @@ export class TableModel {
 export interface Round {
   id: number;
   lastMovement: Moment,
+  winner: string
 }
 
 export interface iTable extends TableModel {

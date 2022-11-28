@@ -33,14 +33,14 @@ export class TablesService {
       if ( !this._player.current$.value ) {
         const pid = this._player.currentPlayerID
         console.log( `players/${ this._player.currentPlayerID }` )
-        await this._afs.doc<TablePlayer>( `players/${ this._player.currentPlayerID }` ).get().pipe(
+        await this._afs.doc<TablePlayer>( `players/${ pid }` ).get().pipe(
           tap( p => console.log( p ) ),
-          map(p =>{ if (p.exists) this._player.current$.next(p.data()!)}),
+          // map(p =>{ if (p.exists) this._player.current$.next(p.data()!)}),
         ).toPromise()
       }
 
       console.log( this._player.current$.value )
-      await this._player.getIn( table.id, table.currentRound, this._player.current$.value!.id )
+      await this._player.getIn( table.id )
 
       this._router.navigate( [ '/table', table.id ], {
         queryParams: {
