@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { BehaviorSubject, Observable, Subscription, SubscriptionLike } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { first, map, tap } from 'rxjs/operators';
 import { iPlayer, iTablePlayer, PlayerModel, TablePlayer } from '../models/player.model';
 import { SetNicknameDialog } from '../components/set-nickname/set-nickname.dialog';
 import firebase from 'firebase/app'
@@ -23,26 +23,27 @@ export class PlayerService {
     if ( !cache ) throw {code: 'player/not-cached'}
     return JSON.parse(cache)
   }
-  private _playerSubscription?: Subscription
 
   constructor (
     private _afs: AngularFirestore,
     private _dialog: MatDialog
   ) { }
 
-  async init() {
+  async create() {
+    console.log( 'CRATE PLAYER' )
     const player = this.current$.value || new PlayerModel()
     const playerPath =  `players/${ player.id }`
-    await this._afs.doc( playerPath ).set( { ...player }, { merge: true } )
 
     if ( !this.current$.value ) {
       const nickname = await this._dialog.open( SetNicknameDialog )
-        .afterClosed()
-        .pipe( first() )
-        .toPromise()
+      .afterClosed()
+      .pipe( first() )
+      .toPromise()
 
-      this._afs.doc<PlayerModel>( playerPath ).update( { nick: nickname } )
+      player.nick = nickname
     }
+
+    await this._afs.doc( playerPath ).set( { ...player }, { merge: true } )
     localStorage.setItem('crtPyr', JSON.stringify(player.id))
 
     return player.id
@@ -50,10 +51,7 @@ export class PlayerService {
 
   listen() {
     return this.currentRef.valueChanges().pipe(
-      map( changes => {
-        // console.log( changes )
-        this.current$.next( changes )
-      } )
+      tap( changes => this.current$.next(changes) )
     )
   }
 

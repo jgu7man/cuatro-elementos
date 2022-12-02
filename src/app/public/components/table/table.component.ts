@@ -7,6 +7,7 @@ import { PlayerService } from '../../services/player.service';
 import { TableService } from '../../services/table.service';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
+import firebase from 'firebase/app'
 
 @Component({
   templateUrl: './table.component.html',
@@ -15,7 +16,7 @@ import { Subscription } from 'rxjs';
 export class TableComponent implements OnInit, OnDestroy {
 
   droppedDeck: iCard[] = []
-  colorSelected?: ColorType
+  colorSelected?: ColorType | firebase.firestore.FieldValue
   players: PlayerModel[] = []
   clockDirection: boolean = true
   #tid: string = ''
@@ -40,8 +41,8 @@ export class TableComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     // console.log( this.rid )
     this.tableSubscription =
-      this.table_.initTable( this.tid ).pipe(
-        concatMap( () => this.table_.listenPlayers().pipe(count()) ),
+      this.table_.connectTable( this.tid ).pipe(
+        // concatMap( () => this.table_.listenPlayers().pipe(count()) ),
         // tap( event => console.log( event ) ),
       ).subscribe()
     // this.playaersSubscription =

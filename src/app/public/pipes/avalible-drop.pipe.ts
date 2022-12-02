@@ -1,42 +1,39 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { combineLatest, from, Observable, of } from 'rxjs';
-import { debounceTime, map, mergeMap, mergeScan, reduce } from 'rxjs/operators';
-// import { mergeLatest } from "rxjs/operators";
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { iCard } from '../models/table.model';
 import { PlayerService } from '../services/player.service';
 import { TableService } from '../services/table.service';
 
-@Pipe({
+@Pipe( {
   name: 'avaliableDrop',
-})
+  pure: true
+} )
 export class AvalibleDropPipe implements PipeTransform {
 
   constructor (
     private _table: TableService,
-  ){}
+    private _player: PlayerService
+  ) { }
 
   transform( deck: iCard[] ): Observable<boolean> {
+    return this._table.currentDeck$.pipe(
+      map( () => {
+        // console.log( deck )
+        // console.log( this._player.current$.value?.deck )
+        if ( !deck ) { return false }
+        if ( this._table.table.currentRound.winner ) return false
 
-    if ( !deck ) { return of(false)}
-    return this._table.table$.pipe(
-      mergeMap( (table) => {
-        console.log( 'update', table )
-        if (table?.currentRound.winner) return of(false)
-        return from( deck ).pipe(
-          mergeMap( card => this._table.allowedCard$( card ) ),
-          mergeScan<boolean, boolean[]>( ( acc, available ) => {
-            console.log( available  )
-            acc.push( available )
-            return of(acc)
-          }, [] ),
-          debounceTime(100),
-          map( availables => {
-            console.log( availables.some(a => a === true) )
-            return availables.some(a => a === true)
-          } )
-        )}
+        const availables = deck.map( card => this._table.allowedCard( card ) )
+        // console.log( availables )
+        return availables.some( a => a === true )
+      })
       )
-    )
+
+
   }
+
+
+
 
 }

@@ -19,6 +19,8 @@ import { OccupancyPipe } from './pipes/occupancy.pipe';
 import { AreInPipe } from './pipes/are-in.pipe';
 import { WithinDeckDirective } from './directives/within-deck.directive';
 import { AvalibleDropPipe } from './pipes/avalible-drop.pipe';
+import { TableListComponent } from './components/lobby/table-list/table-list.component';
+import { PlayerAreaComponent } from './components/table/player-area/player-area.component';
 
 
 @NgModule({
@@ -37,7 +39,9 @@ import { AvalibleDropPipe } from './pipes/avalible-drop.pipe';
     CardComponent,
     OccupancyPipe,
     AreInPipe,
-    WithinDeckDirective
+    WithinDeckDirective,
+    TableListComponent,
+    PlayerAreaComponent
   ],
   imports: [
     CommonModule,

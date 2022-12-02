@@ -6,8 +6,6 @@
     </div>
   </div>
 
-
-
   <div class="row">
 
     <div class="col s12 m8 l9">
@@ -25,39 +23,20 @@
       <div id="table-list-container">
         <mat-card id="table-list">
           <mat-card-content>
+
             <ng-container *ngIf="(tables.list$ | async) as tableList; else loading">
-              <ng-container *ngFor="let item of tableList">
-                <mat-list [routerLink]="['/table', item.id]"
-                [queryParams]="{rid: item.currentRound}">
-
-                  <mat-list-item class="table-item-list"
-                  [matTooltip]="item.started ? 'Esta mesa ya está jugando una partida' : 'Esta mesa está libre'">
-                    <mat-icon mat-list-icon>table_restaurant</mat-icon>
-                    <div mat-line>
-                      {{item.id}}
-                      <mat-icon class="sm"
-                      [ngClass]="{
-                        'green-text': !item.started,
-                        'red-text': item.started
-                      }"
-                      >circle</mat-icon>
-                    </div>
-                    <div mat-line>
-                      <!-- <mat-icon>groups</mat-icon> -->
-                      {{item | occupancy | async}}/10 Jugadores
-                    </div>
-                  </mat-list-item>
-
-                </mat-list>
-              </ng-container>
+              <app-table-list [tableList]="tableList"></app-table-list>
             </ng-container>
-            <ng-template #loading >
 
+            <ng-template #loading >
+              <div class="center">
+                <mat-progress-spinner mode="indeterminate" color="primary"></mat-progress-spinner>
+              </div>
             </ng-template>
+
           </mat-card-content>
         </mat-card>
       </div>
-
     </div>
   </div>
 </div>

@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { BehaviorSubject, combineLatest, Observable, of, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
 import { iPlayer, iTablePlayer, TablePlayer } from '../models/player.model';
 import { ColorType, Deck, iCard, iTable, Round } from '../models/table.model';
 import { MatDialog } from '@angular/material/dialog';
 import { WinnerDialog } from '../components/winner/winner.dialog';
-import { catchError, distinctUntilChanged, first, map, mergeMap,  tap } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, first, map, mergeMap,  tap } from 'rxjs/operators';
 import { SelectColorDialog } from '../components/select-color/select-color.dialog';
 import firebase from 'firebase/app'
 import Swal from 'sweetalert2';
@@ -21,20 +21,21 @@ export class TableService {
   table$ = new BehaviorSubject<iTable | undefined>( undefined );
   players$ = new BehaviorSubject<iTablePlayer[]>( [] )
   currentDeck$ = new BehaviorSubject<iCard[]>( [] )
+  public allowedPlayer$ = new BehaviorSubject<boolean>(false);
 
   /** Table instance from BehaviorSubject subject */
   get table() {
     if (!this.table$.value) throw {code: 'table/current-is-undefined'}
     return this.table$.value
   }
-  /** List of current players in table  */
-  get players() { return this.players$.value }
-
   /** Firebase ref for the current table */
   get tableRef() {
     if ( !this.table ) throw { code: 'table/current-is-undefined'}
     return this._afs.doc<iTable>( `tables/${ this.table.id }` ).ref
   }
+  /** List of current players in table  */
+  get players() { return this.players$.value }
+
   get playersCol() {
     return this._afs.collection<iTablePlayer>( 'players' )
   }
@@ -44,27 +45,13 @@ export class TableService {
     return this.players.findIndex( p => p.inTurn)
   }
 
-  /** Index of next player */
-  get nextPlayerIndex() {
-    const next = this.table?.clockDirection
-      ? this.currentPi + 1 === this.players.length
-        ? 0 : this.currentPi + 1
-      : this.currentPi - 1 === -1
-        ? this.players.length - 1 : this.currentPi - 1
-    return next
-  }
-
-  get nextPlayerID() {
-    return this.players[ this._getNextPlayerIndex() ].id
-  }
-
   get nextPlayer() {
     return this.players[ this._getNextPlayerIndex() ]
   }
 
   get nextPlayerRef() {
     return this._afs.doc
-      <TablePlayer>( `players/${ this.nextPlayerID }` )
+      <TablePlayer>( `players/${ this.nextPlayer.id }` )
       .ref
   }
 
@@ -73,18 +60,20 @@ export class TableService {
     private _dialog: MatDialog,
     private _router: Router,
     private _player: PlayerService
-  ) {
+  ) { }
 
-  }
+  private waitFor = (ms: number) => new Promise(r => setTimeout(r, ms))
 
   /** Connect to the table on firestore */
-  initTable( tid: string ): Observable<iTable | undefined> {
+  connectTable( tid: string ): Observable<any> {
     return this._afs
       .doc<iTable>( `tables/${ tid }` )
       .valueChanges()
       .pipe(
         distinctUntilChanged( ( x, y ) => JSON.stringify( x ) === JSON.stringify( y ) ),
+        debounceTime(500),
         map( changes => {
+          console.log( 'TABLE CHANGED' )
           if ( changes ) {
             if (changes.currentRound.winner) this._noticeWinner(changes.currentRound.winner);
             this.table$.next( changes )
@@ -95,6 +84,7 @@ export class TableService {
             throw { code: 'table/not-found' }
           }
         } ),
+        mergeMap(() => this.listenPlayers() ),
         catchError( this._handleError )
       )
   }
@@ -105,10 +95,11 @@ export class TableService {
       ref => ref.where( 'tableId', '==', this.table.id ) )
       .valueChanges()
       .pipe(
-        // tap(list => console.log(list)),
+        tap( () => console.log( 'LISTEN PLAYERS' ) ),
         map( list => {
           if ( list ) {
             this.players$.next( list )
+            this.allowedPlayer$.next(this._getAllowedPlayer(list))
             return list
           } else throw {code: 'players/not-found'}
         } ),
@@ -137,7 +128,7 @@ export class TableService {
       // SET PLAYERS DECKS
       console.log( 'SET PLAYERS DECK' )
       await this._asyncForEach( this.players, async ( player: TablePlayer ) => {
-        player.deck = this._moveCards(player.deck, 7)
+        player.deck = await this._moveCards(player.deck, 7)
         player.inTurn = player.id === startPlayer.id
         batch.update(this.playersCol.ref.doc(player.id), {...player})
       } )
@@ -181,16 +172,17 @@ export class TableService {
   /** Take a card from main deck for player id */
   async takeCard(): Promise<void> {
     try {
-      const allowTake = await this.allowedPlayer$().pipe( first() ).toPromise()
+      console.log( 'TAKE CARD' )
+      const allowTake = await this.allowedPlayer$.pipe( first() ).toPromise()
       const currentPlayer = this._player.current$.value;
       if ( !currentPlayer ) throw { code: 'player/not-found' }
 
       if ( allowTake ) {
-        currentPlayer.deck = this._moveCards(currentPlayer.deck)
+        currentPlayer.deck =  await this._moveCards(currentPlayer.deck)
       }
 
       /* UPDATE TURN */
-      // const pIndex = this.players.findIndex( p => p.id === currentPlayer.id )
+      console.log( 'UPDATE PLAYER' )
       this.players[ this.currentPi ] = currentPlayer
       this.changeTurn()
 
@@ -202,22 +194,24 @@ export class TableService {
 
   /** On player drop card */
   async dropCard( card: iCard ): Promise<void> {
-    if (!this._player.current$.value) throw {code: 'player/current-not-found'}
-    const allowedCard = await this.allowedCard$( card )
-      .pipe( first() ).toPromise()
-    const allowedPlayer = await this.allowedPlayer$().pipe( first() ).toPromise()
+    if ( !this._player.current$.value ) throw { code: 'player/current-not-found' }
+    console.log( 'DROP CARD' )
+    const allowedCard = this.allowedCard( card )
+    const allowedPlayer = await this.allowedPlayer$.pipe( first() ).toPromise()
     const playerDeck: iCard[] = this._player.current$.value.deck
-    console.log( {allowedCard, allowedPlayer} )
 
     if ( allowedCard && allowedPlayer ) {
       const indexCard = playerDeck
         .findIndex( c => c.id === card.id )
 
+      console.log( 'SPLICE CARD' )
       playerDeck.splice( indexCard, 1 )
-      this.players[this.currentPi].deck = playerDeck
+      this.players[ this.currentPi ].deck = playerDeck
+      console.log( 'PUSH CARD' )
       this.table.droppedDeck.push( card )
-      delete this.table.colorSelected
+      this.table.colorSelected = firebase.firestore.FieldValue.delete()
 
+      console.log( 'VALIDATE PLAYER DECK LENGTH' )
       const deckLength = this._player.current$.value.deck.length
       if ( deckLength === 0 ) {
         /* Set winner */
@@ -226,19 +220,18 @@ export class TableService {
         // TODO Call UNO
       }
 
-      this._setCardValue( card )
-
-      // this.changeTurn()
+      return this._setCardValue( card )
     }
   }
 
   /** Change of player turn */
-  async changeTurn(): Promise<void> {
+  async changeTurn(turns: number = 1): Promise<void> {
     try {
       const batch = this._afs.firestore.batch()
 
+      console.log( 'UPDATE TURN OF PLAYERS' )
       await this._asyncForEach( this.players, ( player, index ) => {
-        if ( index === this._getNextPlayerIndex() ) {
+        if ( index === this._getNextPlayerIndex(turns) ) {
           player = { ...player, inTurn: true }
         } else {
           player = { ...player, inTurn: false }
@@ -246,11 +239,11 @@ export class TableService {
         batch.update(this.playersCol.ref.doc(player.id), {...player})
       } )
 
-      console.log( this.table.colorSelected )
-
+      console.log( 'UPDATE TABLE' )
       batch.update(this.tableRef, this.table)
-      await batch.commit()
-      return
+
+      console.log( 'PUSH CHANGES ON DB' )
+      return batch.commit()
     } catch (error: any) {
       console.error( error )
     }
@@ -258,20 +251,25 @@ export class TableService {
 
   /** Restart game in new round */
   async restart(): Promise<void> {
+    console.log( 'RESTART' )
     try {
       const batch = this._afs.firestore.batch()
+
+      console.log( 'UPDATE PLAYERS' )
       await this._asyncForEach( this.players, async ( player ) => {
         player.deck = []
         player.inTurn = false
         batch.update( this.playersCol.ref.doc( player.id ), { ...player } )
       } )
 
+      console.log( 'SET NEW ROUND' )
       let newRound: Round = {
         id: new Date().getTime(),
         lastMovement: new Date(),
         winner: ''
       }
 
+      console.log( 'UPDATE TABLE' )
       batch.update( this.tableRef, {
         ...this.table,
         droppedDeck: [],
@@ -279,11 +277,14 @@ export class TableService {
         currentRound: newRound,
         clockDirection: true,
         started: false,
-        rounds: [ ...this.table!.rounds, newRound ],
+        rounds: [ ...this.table.rounds, newRound ],
       })
 
+      console.log( 'PUSH CHANGES ON DB' )
       await batch.commit()
-      this._router.navigate([], {queryParams:{rid: newRound}})
+      console.log( 'NAVIGATE TO ROUND' )
+      this._router.navigate( [], { queryParams: { rid: newRound } } )
+      return
     } catch ( error ) {
       console.error( error )
     }
@@ -296,8 +297,11 @@ export class TableService {
       this.table.droppedDeck = [ ...player.deck, ...this.table.droppedDeck ]
       player.deck = []
       player.tableId = firebase.firestore.FieldValue.delete()
-      this.players[this.currentPi] = player
-      this.changeTurn()
+      if ( this.table.started ) {
+        this.players[ this.currentPi ] = player
+        this.changeTurn()
+      }
+      else this.playersCol.doc(player.id).update({...player})
     }
   }
 
@@ -308,7 +312,7 @@ export class TableService {
    * @param {iCard[]} deck
    * @returns {*}
    */
-  private _moveCards(deck: iCard[], cant: number = 1): iCard[] {
+  private async _moveCards(deck: iCard[], cant: number = 1): Promise<iCard[]> {
     if ( !this.table ) throw { code: 'table/current-is-undefined' }
     if ( !this.table.deck ) throw { code: 'table/deck-not-found' }
 
@@ -322,6 +326,7 @@ export class TableService {
         if ( !card ) throw { code: 'card/not-getted' }
         deck = [ ...deck, card]
         this.table.deck.splice( this.table.deck.indexOf( card ), 1 )
+        await this.waitFor(250)
       }
     }
 
@@ -331,62 +336,77 @@ export class TableService {
 
 
   /** Set the effect of card for next turn */
-  private async _setCardValue(card: iCard): Promise<void> {
-    if ( card.value == 'tu' ) {
-      this.table.clockDirection = !this.table.clockDirection
-    } else if ( card.value == 'bl' ) {
-      this._getNextPlayerIndex(2)
-    } else if ( card.value == '+2' ) {
-      this.nextPlayer.deck = this._moveCards( this.nextPlayer.deck, 2 )
-      this.players[this._getNextPlayerIndex()] = this.nextPlayer
-    } else if ( card.value == '+4' ) {
-      this.nextPlayer.deck = this._moveCards( this.nextPlayer.deck, 4 )
-      this.players[ this._getNextPlayerIndex() ] = this.nextPlayer
-      await this._openColorSelecter()
-      console.log( this.table.colorSelected )
-    } else if ( card.value === 'ch' ) {
-      await this._openColorSelecter()
-      console.log( this.table.colorSelected )
+  private async _setCardValue( card: iCard ): Promise<void> {
+    console.log( 'SET CARD VALUE' )
+    switch (card.value ) {
+      case 'tu':
+        console.log( 'CHANGE DIRECTION' )
+        this.table.clockDirection = !this.table.clockDirection
+        return this.changeTurn();
+      case 'bl':
+        console.log( 'JUMP TURN' )
+        return this.changeTurn(2);
+      case '+2':
+        console.log( 'GIVE 2' )
+        this.nextPlayer.deck = await this._moveCards( this.nextPlayer.deck, 2 )
+        this.players[this._getNextPlayerIndex()] = this.nextPlayer
+        return this.changeTurn();
+      case '+4':
+        console.log( 'GIVE 4' )
+        this.nextPlayer.deck = await this._moveCards( this.nextPlayer.deck, 4 )
+        this.players[ this._getNextPlayerIndex() ] = this.nextPlayer
+        await this._openColorSelecter()
+        return this.changeTurn();
+      case 'ch':
+        console.log( 'CHANGE COLOR' )
+        await this._openColorSelecter()
+        return this.changeTurn();
+      default:
+        console.log( 'VALUE DONT APPLIED' )
+        return this.changeTurn()
     }
-
-    await this.changeTurn()
   }
 
   /** Check if card is avalible */
-  public allowedCard$( card: iCard ): Observable<boolean> {
-    return this.table$.pipe( map( table => {
-      if (!table) return false
-      else if ( table.droppedDeck.find( c => c.id === card.id ) ) return false
-
-      const last = table.droppedDeck[table.droppedDeck.length -1]
-      if ( !last ) return false
-      else {
-        let validation = ''
-        if ( last.color === card.color ) {
-          validation = 'Same color'
-        } else if ( last.value === card.value ) {
-          validation = 'Same value'
-        } else if ( card.color === 'blk' ) {
-          validation = 'Is black'
-        } else if ( card.color === table.colorSelected ) {
-          validation = 'Color selected'
-        }
-
-        console.log( { card, validation } )
-        return  (last.color === card.color || last.value === card.value)  ||
-          (card.color === 'blk' || card.color === table.colorSelected)
+  public allowedCard( card: iCard ): boolean {
+    if ( this.table.droppedDeck.find( c => c.id === card.id ) ) return false
+    const last = this.table.droppedDeck[this.table.droppedDeck.length -1]
+    if ( !last ) return false
+    else {
+      if ( last.color === card.color ) {
+        // console.log( 'Same color', card, last.color )
+        return true
+      } else if ( last.value === card.value ) {
+        // console.log( 'Same value', card, last.value )
+        return true
+      } else if ( card.color === 'blk' ) {
+        // console.log( 'Is black', card )
+        return true
+      } else if ( card.color === this.table.colorSelected ) {
+        // console.log( 'Color selected', card, this.table.colorSelected )
+        return true
       }
-    } )
-    )
+
+      return false
+      // return  (last.color === card.color || last.value === card.value)  ||
+      //   (card.color === 'blk' || card.color === this.table.colorSelected)
+    }
+
+
   }
 
-  public allowedPlayer$(): Observable<boolean> {
-    return this.players$.pipe( map( players => {
-      if ( !players.length ) return false
+  private _getAllowedPlayer( players: iTablePlayer[] ) {
+    try {
+      if ( !players.length ) throw {code: 'players/not-found'}
       const current = players.find( p => p.id === this._player.currentPlayerID )
-      if ( current && current.inTurn ) return true
+      if ( current && current.inTurn ) {
+        console.log( 'PLAYER IN TURN' )
+        return true
+      }
       return false
-    }) )
+    } catch ( error ) {
+      return false
+    }
   }
 
   /** Open color selecter */
@@ -397,19 +417,22 @@ export class TableService {
     } ).afterClosed().pipe( first() )
       .toPromise()
 
-    console.log( color )
+    console.log( 'COLOR SELECTED: ', color )
     this.table.colorSelected = color;
     return
   }
 
   private _noticeWinner( pid: string ): void {
-    const winner = this.players.find(p => p.id === pid)
+    // const winner = this.players.find(p => p.id === pid)
     this._dialog.open( WinnerDialog, {
       disableClose: true,
-      data: winner
+      data: pid
     } ).afterClosed().pipe( first() ).subscribe( restart => {
       if ( restart ) this.getStarted()
-      else this._router.navigate(['/'])
+      else {
+        this.playerLeave()
+        this._router.navigate( [ '/' ] )
+      }
     })
   }
 

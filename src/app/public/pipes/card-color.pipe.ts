@@ -1,12 +1,13 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { ColorType, iCard } from '../models/table.model';
+import firebase from 'firebase/app'
 
 @Pipe({
   name: 'cardColor'
 })
 export class CardColorPipe implements PipeTransform {
 
-  transform( cardColor: ColorType, ...args: ('color' | 'name')[] ): string {
+  transform( cardColor: ColorType | firebase.firestore.FieldValue, ...args: ('color' | 'name')[] ): string {
     const tag = args[0]
     let color: string = ''
 

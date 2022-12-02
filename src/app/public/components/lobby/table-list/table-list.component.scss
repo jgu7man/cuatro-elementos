@@ -1,0 +1,11 @@
+.table-item-list {
+  cursor: pointer;
+  &:hover {
+    background: #f5f5f5;
+  }
+}
+
+mat-icon.sm {
+  font-size: 12px !important;
+  float: right;
+}

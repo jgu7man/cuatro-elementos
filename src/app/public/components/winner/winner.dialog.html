@@ -1,10 +1,5 @@
-<p mat-dialog-title>¡{{winner.nick}} ha ganado!</p>
-<mat-dialog-actions
-style="display: flex; justify-content: space-around;">
-    <button mat-raised-button
-    (click)="dialog.close()"
-    >Ir al lobby</button>
-    <button mat-raised-button
-    (click)="dialog.close(true)"
-    >Jugar nueva partida</button>
+<p mat-dialog-title>¡{{(player | async)?.nick || 'Alguien'}} ha ganado!</p>
+<mat-dialog-actions style="display: flex; justify-content: space-around;">
+  <button mat-raised-button color="accent" (click)="dialog.close()">Ir al lobby</button>
+  <button mat-raised-button color="primary" (click)="dialog.close(true)">Jugar nueva partida</button>
 </mat-dialog-actions>

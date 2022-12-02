@@ -12,7 +12,7 @@ export class TableModel {
   public currentRound: Round
 
   public clockDirection: boolean = true
-  public colorSelected?: ColorType
+  public colorSelected?: ColorType | firebase.firestore.FieldValue
   public rounds: Round[] = []
 
   constructor (

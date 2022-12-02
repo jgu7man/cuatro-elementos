@@ -18,7 +18,7 @@ $juegauno-primary: mat-palette($md-primary);
 $juegauno-accent: mat-palette($md-accent);
 
 // The warn palette is optional (defaults to red).
-$juegauno-warn: mat-palette($mat-red);
+$juegauno-warn: mat-palette($md-warning);
 
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".

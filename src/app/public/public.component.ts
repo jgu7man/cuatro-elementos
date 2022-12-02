@@ -20,7 +20,7 @@ export class PublicComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    if ( !this.pid ) this.pid = await this.player_.init()
+    if ( !this.pid ) this.pid = await this.player_.create()
     this.playerSignedSubscription =
     this.player_.listen().subscribe()
   }

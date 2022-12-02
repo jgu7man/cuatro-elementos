@@ -1,0 +1,29 @@
+<ng-container *ngIf="tableList.length > 0; else empty">
+  <ng-container *ngFor="let item of tableList">
+    <mat-list [routerLink]="['/table', item.id]" [queryParams]="{rid: item.currentRound}">
+      <mat-list-item class="table-item-list"
+                     [matTooltip]="item.started ? 'Esta mesa ya está jugando una partida' : 'Esta mesa está libre'">
+
+        <mat-icon mat-list-icon>table_restaurant</mat-icon>
+
+        <div mat-line>
+          {{item.id}}
+          <mat-icon class="sm" [ngClass]="{
+                          'green-text': !item.started,
+                          'red-text': item.started
+                        }">circle</mat-icon>
+        </div>
+
+        <div mat-line>
+          <!-- <mat-icon>groups</mat-icon> -->
+          {{item | occupancy | async}}/10 Jugadores
+        </div>
+
+      </mat-list-item>
+    </mat-list>
+  </ng-container>
+</ng-container>
+
+<ng-template #empty>
+  <div class="center"> No hay mesas. Crea una </div>
+</ng-template>

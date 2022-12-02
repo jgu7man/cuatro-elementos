@@ -64,8 +64,10 @@ export class TablesService {
   }
 
   listen() {
-    return this._afs.collection<iTable>( 'tables' )
-      .valueChanges().pipe(
+    return this._afs.collection<iTable>( 'tables', ref => ref
+      .orderBy( 'created', 'desc' )
+      .limit(10)
+    ).valueChanges().pipe(
         map( ( tables: iTable[] ) => {
           this.list$.next( tables )
           return tables
@@ -75,6 +77,10 @@ export class TablesService {
           return []
         })
       )
+  }
+
+  checkExpiration() {
+
   }
 
 }

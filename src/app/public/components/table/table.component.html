@@ -1,6 +1,7 @@
 <div class="container">
   <ng-container *ngIf="(table_.table$ | async) as table">
     <div class="row">
+      <!-- SIDEBAR -->
       <div class="col s12 l3">
         <h2>Mesa {{table.id}}</h2>
 
@@ -35,7 +36,7 @@
                 <button  *ngIf="table.colorSelected"
                 mat-raised-button
                 disable
-                [style.backgroundColor]="table.colorSelected| cardColor: 'color'" >
+                [style.backgroundColor]="table.colorSelected | cardColor: 'color'" >
                   Color elegido: {{table.colorSelected | cardColor: 'name'}}
                 </button>
 
@@ -50,11 +51,13 @@
         </ng-container>
       </div>
 
+      <!-- MAIN AREA -->
       <div class="col s12 l9">
 
+        <!-- STARTED AREA -->
         <ng-container *ngIf="table.started; else unStarted">
-          <!-- DROPPED DECK -->
 
+          <!-- DROPPED DECK -->
           <div class="row" id="dropped-deck-container">
             <div class="col s12 dropped-deck">
               <ng-container *ngIf="table.droppedDeck.length">
@@ -69,51 +72,14 @@
           </div>
 
           <!-- PLAYER AREA -->
-          <ng-container *ngIf="(player_.current$ | async) as player">
-            <div class="row" id="player-deck-container">
-
-              <!-- PLAYER HEADER -->
-              <div class="col s12">
-                <p>
-                  {{player.nick}}
-                  <i class="fas fa-dot-circle red-text"
-                  *ngIf="player.inTurn"></i>
-                </p>
-              </div>
-
-              <div class="col s12 player-deck">
-                <ng-container *ngFor="let card of player.deck">
-                  <app-card
-                  [card]="card"
-                  [appWithinDeck]="player.deck.length"
-                  [playerDeck]="true"
-                  ></app-card>
-                </ng-container>
-              </div>
-
-              <div class="col s12">
-                <button *ngIf="player.inTurn"
-                mat-raised-button
-                color="primary"
-                [disabled]="(player.deck | avaliableDrop | async)"
-                (click)="table_.takeCard()" >
-                  Tomar una carta
-                </button>
-                <!-- <button *ngIf="player.current"
-                mat-raised-button
-                color="accent"
-                (click)="letTurn()" >
-                  Pasar turno
-                </button> -->
-
-              </div>
-            </div>
-          </ng-container>
+          <app-player-area></app-player-area>
 
         </ng-container>
 
+        <!-- UNESTARTED -->
         <ng-template #unStarted >
 
+          <!-- IN TABLE -->
           <ng-container *ngIf="tid | areIn | async; else notIn">
             <button mat-raised-button color="primary"
             (click)="table_.getStarted()"
@@ -122,6 +88,7 @@
             >Iniciar partida</button>
           </ng-container>
 
+          <!-- NO IN TABLE -->
           <ng-template #notIn>
             <button mat-raised-button color="accent"
             (click)="addPlayer()"
