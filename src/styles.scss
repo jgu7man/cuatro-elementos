@@ -14,26 +14,26 @@
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
-$juegauno-primary: mat-palette($md-primary);
-$juegauno-accent: mat-palette($md-accent);
+$elementos-primary: mat-palette($md-primary);
+$elementos-accent: mat-palette($md-accent);
 
 // The warn palette is optional (defaults to red).
-$juegauno-warn: mat-palette($md-warning);
+$elementos-warn: mat-palette($md-warning);
 
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".
-$juegauno-theme: mat-light-theme((
+$elementos-theme: mat-light-theme((
   color: (
-    primary: $juegauno-primary,
-    accent: $juegauno-accent,
-    warn: $juegauno-warn,
+    primary: $elementos-primary,
+    accent: $elementos-accent,
+    warn: $elementos-warn,
   )
 ));
 
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
-@include angular-material-theme($juegauno-theme);
+@include angular-material-theme($elementos-theme);
 
 /* You can add global styles to this file, and also import other style files */
 
