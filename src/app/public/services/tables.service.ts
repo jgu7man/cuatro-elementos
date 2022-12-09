@@ -1,86 +1,92 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { TablePlayer } from '../models/player.model';
 import { iTable, TableModel } from '../models/table.model';
+import { ErrorSeverity, ErrorsService } from './errors.service';
 import { PlayerService } from './player.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TablesService {
+  /**
+   * Catch the list of the table changes
+   * @type {(BehaviorSubject<iTable[] | null>)}
+   */
+  list$: BehaviorSubject<iTable[] | null> = new BehaviorSubject<
+    iTable[] | null
+  >(null);
 
-  list$ = new BehaviorSubject<iTable[] | null>(null)
-
-  constructor (
+  constructor(
     private _afs: AngularFirestore,
     private _router: Router,
-    private _dialog: MatDialog,
-    private _player: PlayerService
-  ) { }
+    private _player: PlayerService,
+    private _error: ErrorsService
+  ) {}
 
-  async create() {
+  /**
+   * Create a new table
+   * @returns {*}  {Promise<void>}
+   */
+  async create(): Promise<void> {
     try {
-      const table = new TableModel()
-      await this._afs.collection<TableModel>( 'tables' )
+      /* Create the table on database */
+      const table = new TableModel();
+      await this._afs
+        .collection<TableModel>('tables')
         .doc(table.id)
-        .set( { ...table } )
+        .set({ ...table })
+        .catch((source) => {
+          throw {
+            code: 'table/could-not-create',
+            severity: ErrorSeverity.ALERT,
+            source,
+          };
+        });
 
+      /* Sit the player on the table */
+      await this._player.getIn(table.id);
 
-      if ( !this._player.current$.value ) {
-        const pid = this._player.currentPlayerID
-        console.log( `players/${ this._player.currentPlayerID }` )
-        await this._afs.doc<TablePlayer>( `players/${ pid }` ).get().pipe(
-          tap( p => console.log( p ) ),
-          // map(p =>{ if (p.exists) this._player.current$.next(p.data()!)}),
-        ).toPromise()
-      }
-
-      console.log( this._player.current$.value )
-      await this._player.getIn( table.id )
-
-      this._router.navigate( [ '/table', table.id ], {
+      /* Redirects to the table */
+      this._router.navigate(['/table', table.id], {
         queryParams: {
-          rid: table.currentRound
-        }
-      } )
-      return
+          rid: table.currentRound,
+        },
+      });
+      return;
     } catch (error) {
-      return console.error(error)
+      this._error.handle(error);
+      return;
     }
   }
 
-  get() {
-    return this._afs.collection<iTable>( 'tables' )
-      .valueChanges().pipe(
-        catchError( error => {
-          console.error(error);
-          return []
-        })
+  /**
+   * Listen the list of tables and updates `this.list$`
+   * @returns {*}  {Observable<iTable[]>}
+   */
+  listen(): Observable<iTable[]> {
+    return this._afs
+      .collection<iTable>('tables', (ref) =>
+        ref.orderBy('created', 'desc').limit(10)
       )
-  }
-
-  listen() {
-    return this._afs.collection<iTable>( 'tables', ref => ref
-      .orderBy( 'created', 'desc' )
-      .limit(10)
-    ).valueChanges().pipe(
-        map( ( tables: iTable[] ) => {
-          this.list$.next( tables )
-          return tables
+      .valueChanges()
+      .pipe(
+        map((tables: iTable[]) => {
+          this.list$.next(tables);
+          return tables;
         }),
-        catchError( error => {
-          console.error(error);
-          return []
+        catchError((source) => {
+          this._error.handle({
+            code: 'table-list/con-not-connect',
+            severity: ErrorSeverity.ALERT,
+            source,
+          });
+          return [];
         })
-      )
+      );
   }
 
-  checkExpiration() {
-
-  }
-
+  checkExpiration() {}
 }

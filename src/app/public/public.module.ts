@@ -21,6 +21,8 @@ import { WithinDeckDirective } from './directives/within-deck.directive';
 import { AvalibleDropPipe } from './pipes/avalible-drop.pipe';
 import { TableListComponent } from './components/lobby/table-list/table-list.component';
 import { PlayerAreaComponent } from './components/table/player-area/player-area.component';
+import { PlayersListComponent } from './components/table/players-list/players-list.component';
+import { ActionsBarComponent } from './components/table/actions-bar/actions-bar.component';
 
 
 @NgModule({
@@ -41,7 +43,9 @@ import { PlayerAreaComponent } from './components/table/player-area/player-area.
     AreInPipe,
     WithinDeckDirective,
     TableListComponent,
-    PlayerAreaComponent
+    PlayerAreaComponent,
+    PlayersListComponent,
+    ActionsBarComponent
   ],
   imports: [
     CommonModule,

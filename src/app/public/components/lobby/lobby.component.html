@@ -1,42 +1,42 @@
+<mat-toolbar class="mat-elevation-z5">
+  <span>Elementos</span>
+  <span class="spacer"></span>
+  <span>
+    <span *ngIf="player.current$ | async as player">
+      {{player.nick}}
+    </span>
+  </span>
+</mat-toolbar>
+
 <div class="container">
-
   <div class="row">
-    <div class="col s12">
-      <h1>Juega UNO</h1>
-    </div>
-  </div>
-
-  <div class="row">
-
     <div class="col s12 m8 l9">
       <p>Elige una mesa o Abre una mesa nueva</p>
     </div>
-
     <div class="col s12 m4 l3 right">
-      <button mat-raised-button
-      color="primary"
-      (click)="tables.create()"
-      >Abrir mesa nueva</button>
+      <button mat-raised-button color="primary" (click)="tables.create()">Abrir mesa nueva</button>
     </div>
-
     <div class="col s12">
       <div id="table-list-container">
         <mat-card id="table-list">
           <mat-card-content>
-
             <ng-container *ngIf="(tables.list$ | async) as tableList; else loading">
               <app-table-list [tableList]="tableList"></app-table-list>
             </ng-container>
-
-            <ng-template #loading >
+            <ng-template #loading>
               <div class="center">
                 <mat-progress-spinner mode="indeterminate" color="primary"></mat-progress-spinner>
               </div>
             </ng-template>
-
           </mat-card-content>
         </mat-card>
       </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col s12">
+      <button mat-button *ngIf="player.current$ | async" (click)="player.purge()">Reiniciar
+        Jugador</button>
     </div>
   </div>
 </div>

@@ -17,5 +17,6 @@
 style="display: flex; justify-content: center;">
     <button mat-raised-button
     [mat-dialog-close]="nameCtrl.value"
+    (keydown.Enter)="nameCtrl.value"
     >Ok!</button>
 </mat-dialog-actions>

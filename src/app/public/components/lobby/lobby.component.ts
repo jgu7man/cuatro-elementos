@@ -1,28 +1,24 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { TablesService } from '../../services/tables.service';
-import { TableModel } from '../../models/table.model';
+import { PlayerService } from '../../services/player.service';
 
 @Component({
   templateUrl: './lobby.component.html',
-  styleUrls: ['./lobby.component.scss']
+  styleUrls: ['./lobby.component.scss'],
 })
-export class LobbyComponent implements OnInit, OnDestroy {
-
-  private tablesSubscription: Subscription
-  constructor (
-    public tables: TablesService,
-  ) {
-    this.tablesSubscription = this.tables.listen().subscribe()
-  }
-
-  ngOnInit(): void {
+export class LobbyComponent implements OnDestroy {
+  /**
+   * Allows unsuscribe from list of tables
+   * @private
+   * @type {Subscription}
+   */
+  private tablesSubscription: Subscription;
+  constructor(public tables: TablesService, public player: PlayerService) {
+    this.tablesSubscription = this.tables.listen().subscribe();
   }
 
   ngOnDestroy(): void {
-    this.tablesSubscription.unsubscribe()
+    this.tablesSubscription.unsubscribe();
   }
-
-
 }

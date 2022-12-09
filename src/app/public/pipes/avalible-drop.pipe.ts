@@ -2,38 +2,31 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { iCard } from '../models/table.model';
-import { PlayerService } from '../services/player.service';
 import { TableService } from '../services/table.service';
 
-@Pipe( {
+@Pipe({
   name: 'avaliableDrop',
-  pure: true
-} )
+  pure: true,
+})
 export class AvalibleDropPipe implements PipeTransform {
+  constructor(private _table: TableService) {}
 
-  constructor (
-    private _table: TableService,
-    private _player: PlayerService
-  ) { }
-
-  transform( deck: iCard[] ): Observable<boolean> {
+  /**
+   * Validate if the player is allowed to drop
+   * @param {iCard[]} deck Deck of the player
+   * @returns {*}  {Observable<boolean>} true if the player is allowed to drop
+   */
+  transform(deck: iCard[]): Observable<boolean> {
     return this._table.currentDeck$.pipe(
-      map( () => {
-        // console.log( deck )
-        // console.log( this._player.current$.value?.deck )
-        if ( !deck ) { return false }
-        if ( this._table.table.currentRound.winner ) return false
+      map(() => {
+        if (!deck) {
+          return false;
+        }
+        if (this._table.table.currentRound.winner) return false;
 
-        const availables = deck.map( card => this._table.allowedCard( card ) )
-        // console.log( availables )
-        return availables.some( a => a === true )
+        const availables = deck.map((card) => this._table.allowedCard(card));
+        return availables.some((a) => a === true);
       })
-      )
-
-
+    );
   }
-
-
-
-
 }

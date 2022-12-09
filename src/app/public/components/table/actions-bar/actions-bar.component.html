@@ -1,0 +1,64 @@
+<ng-container *ngIf="(table_.table$ | async) as table">
+  <mat-toolbar color="accent">
+    <!-- STARTED AREA -->
+    <ng-container *ngIf="table.started; else unStarted">
+      <ng-container *ngIf="table.id| areIn | async; else asViewer">
+
+        <!-- RESTART -->
+        <button mat-button color="primary"
+          matTooltip="Reiniciar partida"
+          *ngIf="table.started"
+          (click)="table_.restart()">
+            <mat-icon class="mat-18">restart_alt</mat-icon>
+            Reiniciar
+          </button>
+
+          <!-- LEAVE TABLE -->
+          <button mat-button
+          color="warning"
+          matTooltip="Abandonar partida"
+          (click)="table_.playerLeave()">
+            <mat-icon class="mat-18">logout</mat-icon>
+            Dejar mesa
+          </button>
+
+          <!-- SELECTED COLOR -->
+          <button  *ngIf="table.colorSelected && (table.colorSelected | cardColor) as colorSelected "
+          [style.backgroundColor]="colorSelected.bg"
+          [style.color]="colorSelected.color"
+          mat-raised-button
+          disable
+          >
+            Color elegido: {{colorSelected.txt}}
+          </button>
+
+      </ng-container>
+      <!-- AS VIEWER -->
+      <ng-template #asViewer>
+        <p id="invited-message">Estás en esta mesa como invitado.</p>
+      </ng-template>
+    </ng-container>
+
+    <!-- UNESTARTED -->
+    <ng-template #unStarted >
+
+      <!-- IN TABLE -->
+      <ng-container *ngIf="table.id | areIn | async; else notIn">
+        <button mat-raised-button color="primary"
+        (click)="table_.getStarted()"
+        *ngIf="(table_.players$ | async) as players"
+        [disabled]="players.length < 0"
+        >Iniciar partida</button>
+      </ng-container>
+
+      <!-- NO IN TABLE -->
+      <ng-template #notIn>
+        <button mat-raised-button color="primary"
+        (click)="addPlayer()"
+        >Unirse a la mesa</button>
+      </ng-template>
+
+
+    </ng-template>
+  </mat-toolbar>
+</ng-container>

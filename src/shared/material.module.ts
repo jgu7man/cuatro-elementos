@@ -45,7 +45,8 @@ import {PortalModule} from '@angular/cdk/portal';
 import {CdkStepperModule} from '@angular/cdk/stepper';
 import {CdkTableModule} from '@angular/cdk/table';
 import {CdkTreeModule} from '@angular/cdk/tree';
-import {DragDropModule} from '@angular/cdk/drag-drop';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import {ClipboardModule} from '@angular/cdk/clipboard';
 
 /**
  * NgModule that includes all Material modules.
@@ -62,7 +63,8 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
         CdkStepperModule,
         CdkTableModule,
         CdkTreeModule,
-        DragDropModule,
+    DragDropModule,
+    ClipboardModule,
         // Material
         MatAutocompleteModule,
         MatBadgeModule,

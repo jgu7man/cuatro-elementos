@@ -1,0 +1,10 @@
+<b>Jugadores</b>
+<mat-list id="players-list" *ngIf="(table.players$ | async) as players">
+  <mat-list-item *ngFor="let player of players">
+    <mat-icon mat-list-icon
+    [ngClass]="{'lime-text': player.inTurn}"
+    >person</mat-icon>
+    <div mat-line>{{player.nick}}</div>
+    <div mat-line *ngIf="player.deck.length"> Cartas {{player.deck.length}} </div>
+  </mat-list-item>
+</mat-list>

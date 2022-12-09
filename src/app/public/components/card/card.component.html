@@ -1,7 +1,7 @@
 <ng-container *ngIf="card">
   <div class="card-container" [style.width]="width">
     <ng-container *ngIf="playerDeck; else nonPlayerDeck">
-      <mat-card [style.backgroundColor]="card.color | cardColor:'color'"
+      <mat-card [style.backgroundColor]="(card.color | cardColor).bg"
       class="card mat-elevation-z5"
       (click)="table_.dropCard(card)"
       [ngClass]="{'unavalible': !(card | avalibleCard | async ) && playerDeck }"
@@ -15,7 +15,7 @@
       </mat-card>
     </ng-container>
     <ng-template #nonPlayerDeck >
-      <mat-card [style.backgroundColor]="card.color | cardColor:'color'"
+      <mat-card [style.backgroundColor]="(card.color | cardColor).bg"
       class="card mat-elevation-z5"
       >
         <mat-card-content>

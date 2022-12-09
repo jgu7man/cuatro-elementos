@@ -1,22 +1,17 @@
 <ng-container *ngIf="(player.current$ | async) as player">
   <!-- PLAYER HEADER -->
-  <div class="row">
+  <div class="row" *ngIf="player.inTurn">
     <div class="col s12 m4">
-      <p>
-        {{player.nick}}
-        <i class="fas fa-dot-circle red-text" *ngIf="player.inTurn"></i>
-      </p>
+      <p>Tu turno</p>
     </div>
     <div class="col s12 m8">
-      <button *ngIf="player.inTurn"
-              mat-raised-button
-              color="primary"
-              [disabled]="(player.deck | avaliableDrop | async )"
-              (click)="table.takeCard()">
-                Tomar una carta
-              </button>
-      <!-- <button *ngIf="player.current"
-                  mat-raised-button
+      <button mat-raised-button
+            color="primary"
+            [disabled]="(player.deck | avaliableDrop | async )"
+            (click)="table.takeCard()">
+              Tomar una carta
+            </button>
+      <!-- <button mat-raised-button
                   color="accent"
                   (click)="letTurn()" >
                     Pasar turno

@@ -1,28 +1,60 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ColorType, iCard } from '../models/table.model';
-import firebase from 'firebase/app'
+import { ColorType } from '../models/table.model';
+import firebase from 'firebase/app';
 
 @Pipe({
-  name: 'cardColor'
+  name: 'cardColor',
 })
 export class CardColorPipe implements PipeTransform {
-
-  transform( cardColor: ColorType | firebase.firestore.FieldValue, ...args: ('color' | 'name')[] ): string {
-    const tag = args[0]
-    let color: string = ''
-
-    switch (cardColor) {
-      case 'blk': color = tag == 'color' ? '#202020' : 'Negro'
-        break;
-      case 'blu': color = tag == 'color' ? '#0059b1' : 'Agua'
-        break;
-      case 'grn': color = tag == 'color' ? '#347c2a' : 'Tierra'
-        break;
-      case 'red': color = tag == 'color' ? '#d20019' : 'Fuego'
-        break;
-      case 'ylw': color = tag == 'color' ? '#d8c100' : 'Aire'
-    }
-    return color
+  /**
+   * Defines the color of the card
+   * @param {(ColorType | firebase.firestore.FieldValue)} cardColor ColorType
+   * @param {...any[]} args
+   * @returns {*}  {ColorSelected} An object containing the bg color, contrast text, and color label
+   */
+  transform(
+    cardColor: ColorType | firebase.firestore.FieldValue,
+    ...args: any[]
+  ): ColorSelected {
+    const ColorSelected = ColorsMap.get(cardColor as ColorType);
+    return (
+      ColorSelected || { bg: '#202020', txt: 'No selected', color: '#ffffff' }
+    );
   }
+}
 
+/**
+ * Get color object from ColorType property
+ * @type {*}
+ */
+export const ColorsMap: any = new Map<ColorType, ColorSelected>([
+  ['blk', { bg: '#202020', txt: 'No selected', color: '#ffffff' }],
+  ['blu', { bg: '#0059b1', txt: 'Azul', color: '#ffffff' }],
+  ['grn', { bg: '#347c2a', txt: 'Verde', color: '#ffffff' }],
+  ['red', { bg: '#d20019', txt: 'Rojo', color: '#ffffff' }],
+  ['ylw', { bg: '#d8c100', txt: 'Amarillo', color: '#000000' }],
+]);
+
+/**
+ * Object of the color card properties
+ *
+ * @export
+ * @interface ColorSelected
+ */
+export interface ColorSelected {
+  /**
+   * Card background color
+   * @type {string}
+   */
+  bg: string;
+  /**
+   * Label color
+   * @type {string}
+   */
+  txt: string;
+  /**
+   * Color text contrast
+   * @type {string}
+   */
+  color: string;
 }

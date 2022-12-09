@@ -8,5 +8,4 @@ import { Component, Input } from '@angular/core';
 })
 export class TableListComponent {
     @Input() tableList: iTable[] = []
-    constructor () {}
 }

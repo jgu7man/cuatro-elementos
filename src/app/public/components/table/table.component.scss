@@ -1,14 +1,22 @@
+.spacer {
+  flex: 1 1 auto;
+}
 
+.container {
+  padding-bottom: 3em;
+}
+
+#dropped-deck-container {
+  display: flex;
+  justify-content: center;
+}
 
 .dropped-deck {
   display: flex;
   flex-flow: row;
   max-width: 50px;
+  margin: 0 auto;
 }
-
-
-
-
 
 ::ng-deep {
   .wildcard {

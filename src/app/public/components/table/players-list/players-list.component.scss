@@ -1,0 +1,13 @@
+
+#players-list {
+  border-top: 1px solid #ccc;
+  padding-top: 0 !important;
+  border-style: outset !important;
+  ::ng-deep {
+    mat-list-item {
+      height: 32px;
+      border-bottom: solid #ccc 1px;
+      padding: 3px 0;
+    }
+  }
+}
