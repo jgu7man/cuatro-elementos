@@ -20,14 +20,15 @@
   }
   .big-value {
     height: 8em;
-    border-radius: 66% 33%;
     overflow: hidden;
-    background: #fff;
-    box-shadow: inset 2px 2px 16px -1px rgb(0 0 0 / 50%);
     display: flex;
     justify-content: center;
     align-items: center;
-    position: relative;
+    position: absolute;
+    width: 100%;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 50%;
     span {
       font-weight: bold;
       position: absolute;

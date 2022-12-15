@@ -1,30 +1,44 @@
 <ng-container *ngIf="card">
   <div class="card-container" [style.width]="width">
     <ng-container *ngIf="playerDeck; else nonPlayerDeck">
+
       <mat-card [style.backgroundColor]="(card.color | cardColor).bg"
       class="card mat-elevation-z5"
+      [appCardStyle]="cardStyle"
       (click)="table_.dropCard(card)"
       [ngClass]="{'unavalible': !(card | avalibleCard | async ) && playerDeck }"
       >
         <mat-card-content>
-          <div class="card-value" [innerHtml]="card | cardValue:'small'"></div>
-          <div class="big-value" >
+          <div class="card-value"
+          appCardValueStyle
+          [innerHtml]="card | cardValue:'small'"
+          ></div>
+          <div class="big-value"
+          appBigValueContainerStyle>
             <span class="front" [innerHtml]="card | cardValue:'big'"></span>
           </div>
         </mat-card-content>
       </mat-card>
+
     </ng-container>
     <ng-template #nonPlayerDeck >
-      <mat-card [style.backgroundColor]="(card.color | cardColor).bg"
+
+      <mat-card [appCardStyle]="cardStyle"
+      [style.backgroundColor]="(card.color | cardColor).bg"
       class="card mat-elevation-z5"
       >
         <mat-card-content>
-          <div class="card-value" [innerHtml]="card | cardValue:'small'"></div>
-          <div class="big-value" >
+          <div class="card-value"
+          appCardValueStyle
+          [innerHtml]="card | cardValue:'small'"
+          ></div>
+          <div class="big-value"
+          appBigValueContainerStyle>
             <span class="front" [innerHtml]="card | cardValue:'big'"></span>
           </div>
         </mat-card-content>
       </mat-card>
+
     </ng-template>
   </div>
 </ng-container>

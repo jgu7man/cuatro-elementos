@@ -1,3 +1,4 @@
+import { MatDialogRef } from '@angular/material/dialog';
 import { Component } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 
@@ -7,6 +8,10 @@ import { FormControl, Validators } from '@angular/forms';
 } )
 export class SetNicknameDialog {
 
-  nameCtrl: FormControl = new FormControl('', [Validators.required]);
+  nameCtrl: FormControl = new FormControl( '', [ Validators.required ] );
+
+  constructor (
+    public dialog: MatDialogRef<SetNicknameDialog>,
+  ) { }
 
 }

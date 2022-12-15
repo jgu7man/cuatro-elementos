@@ -14,7 +14,7 @@ import { SelectColorDialog } from './components/select-color/select-color.dialog
 import { ReactiveFormsModule } from '@angular/forms';
 import { WinnerDialog } from './components/winner/winner.dialog';
 import { SetNicknameDialog } from './components/set-nickname/set-nickname.dialog';
-import { CardComponent } from './components/card/card.component';
+import { CardComponent, CardStyleDirective } from './components/card/card.component';
 import { OccupancyPipe } from './pipes/occupancy.pipe';
 import { AreInPipe } from './pipes/are-in.pipe';
 import { WithinDeckDirective } from './directives/within-deck.directive';
@@ -24,9 +24,13 @@ import { PlayerAreaComponent } from './components/table/player-area/player-area.
 import { PlayersListComponent } from './components/table/players-list/players-list.component';
 import { ActionsBarComponent } from './components/table/actions-bar/actions-bar.component';
 
+const directives = [
+  CardStyleDirective,
+]
 
 @NgModule({
   declarations: [
+    ...directives,
     PublicComponent,
     LobbyComponent,
     TableComponent,
