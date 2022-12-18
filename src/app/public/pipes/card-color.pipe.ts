@@ -1,60 +1,30 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ColorType } from '../models/table.model';
 import firebase from 'firebase/app';
+import { CardColorDefinition, ColorChoice, ColorChoiceType } from '../models/colors.model';
+import { ColorsMap } from '../theme';
 
 @Pipe({
   name: 'cardColor',
 })
 export class CardColorPipe implements PipeTransform {
+
+  defaultReturn: CardColorDefinition = { color: '#202020', label: 'No selected', constrast: '#ffffff' }
   /**
    * Defines the color of the card
-   * @param {(ColorType | firebase.firestore.FieldValue)} cardColor ColorType
+   * @param {(ColorChoiceType)} cardColor ColorType
    * @param {...any[]} args
    * @returns {*}  {ColorSelected} An object containing the bg color, contrast text, and color label
    */
   transform(
-    cardColor: ColorType | firebase.firestore.FieldValue,
-    ...args: any[]
-  ): ColorSelected {
-    const ColorSelected = ColorsMap.get(cardColor as ColorType);
-    return (
-      ColorSelected || { bg: '#202020', txt: 'No selected', color: '#ffffff' }
-    );
+    cardColor: ColorChoiceType,
+    ...args: [keyof CardColorDefinition]
+  ): CardColorDefinition[keyof CardColorDefinition]  {
+    const key = args[0]
+    const ColorSelected = ColorsMap.get(cardColor as ColorChoice);
+    return (ColorSelected || this.defaultReturn)[key]
   }
 }
 
-/**
- * Get color object from ColorType property
- * @type {*}
- */
-export const ColorsMap: any = new Map<ColorType, ColorSelected>([
-  ['blk', { bg: '#202020', txt: 'No selected', color: '#ffffff' }],
-  ['blu', { bg: '#0059b1', txt: 'Azul', color: '#ffffff' }],
-  ['grn', { bg: '#347c2a', txt: 'Verde', color: '#ffffff' }],
-  ['red', { bg: '#d20019', txt: 'Rojo', color: '#ffffff' }],
-  ['ylw', { bg: '#d8c100', txt: 'Amarillo', color: '#000000' }],
-]);
 
-/**
- * Object of the color card properties
- *
- * @export
- * @interface ColorSelected
- */
-export interface ColorSelected {
-  /**
-   * Card background color
-   * @type {string}
-   */
-  bg: string;
-  /**
-   * Label color
-   * @type {string}
-   */
-  txt: string;
-  /**
-   * Color text contrast
-   * @type {string}
-   */
-  color: string;
-}
+
+

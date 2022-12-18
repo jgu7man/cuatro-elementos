@@ -1,6 +1,6 @@
 <p mat-dialog-title>Escribe tu nombre</p>
 <mat-dialog-content>
-  <mat-form-field appearance="outline">
+  <mat-form-field appearance="outline" color="accent">
     <mat-label>Nickname</mat-label>
     <input
     matInput
@@ -18,5 +18,6 @@
 style="display: flex; justify-content: center;">
     <button mat-raised-button
     (click)="dialog.close(nameCtrl.value)"
+    color="accent"
     >Ok!</button>
 </mat-dialog-actions>

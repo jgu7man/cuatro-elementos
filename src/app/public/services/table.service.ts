@@ -6,7 +6,7 @@ import {
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { iTablePlayer, TablePlayer } from '../models/player.model';
-import { ColorType, Deck, iCard, iTable, Round } from '../models/table.model';
+import { Deck, iCard, iTable, Round } from '../models/table.model';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { WinnerDialog } from '../components/winner/winner.dialog';
 import {
@@ -24,6 +24,7 @@ import Swal, { SweetAlertOptions } from 'sweetalert2';
 import { Router } from '@angular/router';
 import { PlayerService } from './player.service';
 import { ErrorsService, ErrorSeverity } from './errors.service';
+import { ColorChoice } from '../models/colors.model';
 
 @Injectable({
   providedIn: 'root',
@@ -622,7 +623,7 @@ export class TableService {
    */
   private async _openColorSelecter(): Promise<void> {
     try {
-      const color: ColorType = await this._dialog
+      const color: ColorChoice = await this._dialog
         .open(SelectColorDialog, {
           disableClose: true,
           data: this.table.id,

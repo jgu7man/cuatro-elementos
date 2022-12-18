@@ -22,7 +22,7 @@ export class PublicComponent implements OnInit, OnDestroy {
   private playerSignedSubscription?: Subscription;
 
   constructor(public player_: PlayerService) {
-    this.pid = JSON.parse(localStorage.getItem('crtPyr')!);
+    this.pid = JSON.parse(sessionStorage.getItem('crtPyr')!);
   }
 
   async ngOnInit(): Promise<void> {

@@ -2,7 +2,7 @@
   <div class="card-container" [style.width]="width">
     <ng-container *ngIf="playerDeck; else nonPlayerDeck">
 
-      <mat-card [style.backgroundColor]="(card.color | cardColor).bg"
+      <mat-card [style.backgroundColor]="card.color | cardColor: 'color'"
       class="card mat-elevation-z5"
       [appCardStyle]="cardStyle"
       (click)="table_.dropCard(card)"
@@ -24,7 +24,7 @@
     <ng-template #nonPlayerDeck >
 
       <mat-card [appCardStyle]="cardStyle"
-      [style.backgroundColor]="(card.color | cardColor).bg"
+      [style.backgroundColor]="card.color | cardColor: 'color'"
       class="card mat-elevation-z5"
       >
         <mat-card-content>

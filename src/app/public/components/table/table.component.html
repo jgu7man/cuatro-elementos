@@ -9,6 +9,9 @@
     </span>
     <span class="spacer"></span>
     <span>
+      <button mat-icon-button [routerLink]="['/']">
+        <mat-icon class="mat-18">logout</mat-icon>
+      </button>
       <span *ngIf="player_.current$ | async as player">
         {{player.nick}}
       </span>

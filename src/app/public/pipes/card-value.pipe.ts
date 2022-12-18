@@ -1,6 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ColorChoice } from '../models/colors.model';
 import { cardValueMap, iCard } from '../models/table.model';
+import { ColorsMap } from '../theme';
 
 @Pipe({
   name: 'cardValue',
@@ -28,10 +30,10 @@ export class CardValuePipe implements PipeTransform {
     } else if (cardValue === 14) {
       return this.sanitized.bypassSecurityTrustHtml(`
       <div class="wildcard wildcard-${args[0]}">
-        <div class="quart" style="background:#d20019"></div>
-        <div class="quart" style="background:#0059b1"></div>
-        <div class="quart" style="background:#d8c100"></div>
-        <div class="quart" style="background:#347c2a"></div>
+        <div class="quart" style="background:${ColorsMap.get(ColorChoice.RED)}"></div>
+        <div class="quart" style="background:${ColorsMap.get(ColorChoice.BLUE)}"></div>
+        <div class="quart" style="background:${ColorsMap.get(ColorChoice.YELLOW)}"></div>
+        <div class="quart" style="background:${ColorsMap.get(ColorChoice.GREEN)}"></div>
       </div>`);
     } else {
       return '';

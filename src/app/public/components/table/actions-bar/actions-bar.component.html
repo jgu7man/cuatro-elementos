@@ -23,13 +23,13 @@
           </button>
 
           <!-- SELECTED COLOR -->
-          <button  *ngIf="table.colorSelected && (table.colorSelected | cardColor) as colorSelected "
-          [style.backgroundColor]="colorSelected.bg"
-          [style.color]="colorSelected.color"
+          <button  *ngIf="table.colorSelected as colorSelected "
+          [style.backgroundColor]="colorSelected | cardColor: 'color'"
+          [style.color]="colorSelected | cardColor: 'color'"
           mat-raised-button
           disable
           >
-            Color elegido: {{colorSelected.txt}}
+            Color elegido: {{colorSelected | cardColor: 'label'}}
           </button>
 
       </ng-container>

@@ -1,7 +1,8 @@
 import { Component, Input, Directive, ElementRef, AfterViewChecked } from '@angular/core';
-import { CardElementStyle, CardStyleModel, defaultCardStyles } from '../../models/card-style.model';
+import { CardElementStyle, CardStyleModel } from '../../models/card-style.model';
 import { iCard } from '../../models/table.model';
 import { TableService } from '../../services/table.service';
+import { defaultCardStyles } from '../../theme';
 
 @Component({
   selector: 'app-card',
